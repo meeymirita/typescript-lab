@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TypeScript Lab — Warehouse: TypeScript с нуля до сквозной типизации</title>
+<style>
+  :root { --red: #3178c6; --red-dark: #235a97; --red-light: #e8f0fa; --red-mid: #bcd3ee; --ink: #1c1c1c; }
+  body { font-family: 'DejaVu Sans', 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 1.6; color: var(--ink); }
+  h1 { font-size: 28px; color: var(--red); margin-bottom: 4px; }
+  .subtitle { font-size: 15px; color: #555; margin-top: 0; margin-bottom: 18px; }
+  h2 { font-size: 21px; color: var(--red-dark); border-bottom: 3px solid var(--red-mid); padding-bottom: 4px; margin-top: 44px; }
+  h3 { font-size: 16px; color: #333; margin-top: 24px; margin-bottom: 6px; }
+  h4 { font-size: 14px; color: #555; margin-top: 16px; margin-bottom: 4px; }
+  p { margin: 7px 0; }
+  code { background: #f1f4f8; padding: 1px 5px; border-radius: 3px; font-family: 'DejaVu Sans Mono', Menlo, Consolas, monospace; font-size: 12.5px; }
+  pre { background: #f6f8fb; border: 1px solid #cfdcec; border-left: 4px solid var(--red); border-radius: 4px; padding: 10px 12px; font-family: 'DejaVu Sans Mono', Menlo, Consolas, monospace; font-size: 12px; line-height: 1.4; white-space: pre-wrap; word-wrap: break-word; }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0 16px 0; font-size: 12.5px; }
+  th, td { border: 1px solid #ddd; padding: 6px 9px; text-align: left; vertical-align: top; }
+  th { background: var(--red-light); color: var(--red-dark); }
+  tr:nth-child(even) td { background: #fafafa; }
+  ul, ol { margin: 4px 0 10px 0; padding-left: 22px; }
+  li { margin: 3px 0; }
+  .tag { display: inline-block; color: #fff; font-size: 11px; font-weight: bold; padding: 1px 8px; border-radius: 3px; margin-bottom: 5px; }
+  .insight-box { background: var(--red-light); border: 1px solid var(--red-mid); border-left: 5px solid var(--red); border-radius: 4px; padding: 8px 14px; margin: 12px 0; }
+  .insight-box .tag { background: var(--red); }
+  .fix-box { background: #f1faf3; border: 1px solid #bfe4c7; border-left: 5px solid #2f9e4a; border-radius: 4px; padding: 8px 14px; margin: 6px 0 14px 0; }
+  .fix-box .tag { background: #2f9e4a; }
+  .note-box { background: #f4f4f6; border: 1px solid #d9d9e0; border-left: 5px solid #555a6e; border-radius: 4px; padding: 8px 14px; margin: 12px 0; }
+  .note-box .tag { background: #555a6e; }
+  .next-box { background: #fff8e6; border: 1px solid #f0dca0; border-left: 5px solid #e0a800; border-radius: 4px; padding: 8px 14px; margin: 14px 0 6px 0; font-size: 13px; }
+  .next-box .tag { background: #e0a800; color: #3a2a00; }
+  .next-box ul { margin: 4px 0 2px 0; }
+  details.deep { border: 1px dashed var(--red-mid); border-radius: 4px; margin: 12px 0; background: #fff; }
+  details.deep summary { cursor: pointer; padding: 8px 14px; font-weight: bold; color: var(--red-dark); background: #eaf1f9; border-radius: 4px; list-style: none; }
+  details.deep summary::before { content: '▸ '; }
+  details.deep[open] summary::before { content: '▾ '; }
+  details.deep .deep-body { padding: 6px 16px 10px 16px; }
+  .toc { background: #f2f6fb; border: 1px solid #cfdcec; border-radius: 6px; padding: 14px 20px; margin: 16px 0 24px 0; }
+  .toc ol { padding-left: 18px; }
+  .small { font-size: 12px; color: #777; }
+  .fnref { color: var(--red); font-weight: bold; font-size: 0.75em; }
+  .glossary-item { margin: 0 0 10px 0; padding-left: 24px; text-indent: -24px; }
+  .glossary-item b { color: var(--red-dark); }
+  .step { margin: 22px 0 10px 0; }
+  .step-head { display: block; background: var(--red-dark); color: #fff; padding: 6px 12px; border-radius: 4px 4px 0 0; font-weight: bold; font-size: 14px; }
+  .step-head .num { display: inline-block; background: #fff; color: var(--red-dark); padding: 0 8px; border-radius: 3px; margin-right: 8px; font-size: 12.5px; }
+  .step-body { border: 1px solid var(--red-mid); border-top: none; border-radius: 0 0 4px 4px; padding: 10px 14px; }
+  .step-body pre { margin: 8px 0; }
+  .why { background: #fff8e6; border-left: 4px solid #e0a800; padding: 6px 12px; margin: 10px 0 4px 0; font-size: 13px; }
+  .why b { color: #8a6500; }
+  .file { font-family: 'DejaVu Sans Mono', Menlo, monospace; font-size: 12px; color: var(--red-dark); background: #fdecea; padding: 1px 6px; border-radius: 3px; }
+  .session-banner { background: linear-gradient(90deg, var(--red-dark), var(--red)); color: #fff; padding: 10px 16px; border-radius: 6px; margin: 28px 0 12px 0; font-size: 17px; font-weight: bold; }
+  .session-banner span { font-weight: normal; font-size: 12px; opacity: 0.9; margin-left: 10px; }
+  .page-break { display: none; }
+  .life { font-family: 'DejaVu Sans Mono', Menlo, monospace; font-size: 12px; }
+
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #fff; }
+  .layout { display: flex; align-items: flex-start; }
+  .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; width: 300px; flex: 0 0 300px; background: var(--red-dark); color: #fff; padding: 52px 12px 16px 12px; box-sizing: border-box; font-size: 12.5px; transition: margin-left .2s; }
+  body.nav-collapsed .sidebar { margin-left: -300px; }
+  .sidebar .nav-title { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 8px; }
+  .sidebar ul { list-style: none; padding-left: 0; margin: 0; }
+  .sidebar li { margin: 1px 0; }
+  .sidebar a { color: #fff; text-decoration: none; display: block; padding: 4px 8px; border-radius: 4px; }
+  .sidebar a:hover { background: #fff; color: var(--red-dark); }
+  .sidebar .nav-steps { padding-left: 8px; border-left: 2px solid rgba(255,255,255,.4); margin: 4px 0 6px 8px; }
+  .sidebar .nav-steps a { font-size: 11.5px; color: #d6e1ee; }
+  .sidebar .nav-steps a:hover { color: var(--red-dark); }
+  .sidebar .nav-session a { color: #fff; font-weight: bold; margin-top: 6px; background: rgba(255,255,255,.12); }
+  .sidebar a .mark { display: inline-block; width: 14px; color: #fff; font-weight: bold; }
+  .sidebar a.done { opacity: .75; }
+  .sidebar a.done .mark::before { content: '✓'; }
+  .sidebar .progress { margin: 6px 0 12px 0; }
+  .sidebar .bar { height: 8px; background: rgba(255,255,255,.25); border-radius: 4px; overflow: hidden; }
+  .sidebar .fill { height: 100%; width: 0; background: #fff; transition: width .3s; }
+  .sidebar .ptext { font-size: 11px; margin-top: 4px; color: #d6e1ee; }
+  .sidebar .reset { margin-top: 16px; background: transparent; border: 1px solid rgba(255,255,255,.5); color: #fff; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+  .sidebar .reset:hover { background: #fff; color: var(--red-dark); }
+  #nav-toggle { position: fixed; top: 10px; left: 10px; z-index: 20; background: var(--red); color: #fff; border: none; border-radius: 6px; width: 38px; height: 34px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+  #nav-toggle:hover { background: var(--red-dark); }
+  main { flex: 1; max-width: 960px; padding: 24px 44px 90px 44px; box-sizing: border-box; min-width: 0; }
+  body.nav-collapsed main { padding-left: 64px; }
+  h2, .step, .glossary-item, .session-banner { scroll-margin-top: 16px; }
+  a { color: var(--red); }
+  a.anchor { color: #a9c1de; text-decoration: none; margin-left: 6px; font-weight: normal; font-size: 0.8em; opacity: 0; }
+  h2:hover a.anchor, .step-head:hover a.anchor { opacity: 1; }
+  .step-head a.anchor { color: #fff; float: right; }
+  a.fnref { text-decoration: none; vertical-align: super; padding: 0 2px; }
+  a.fnref:hover { background: var(--red-light); border-radius: 3px; }
+  a.back { text-decoration: none; font-size: 0.9em; color: #6f97c4; margin-left: 4px; }
+  .glossary-item:target, .step:target { outline: 2px solid var(--red); outline-offset: 4px; border-radius: 4px; }
+  h2:target { background: var(--red-light); }
+  .done-label { display: inline-block; margin-right: 8px; vertical-align: middle; }
+  .done-label input { width: 18px; height: 18px; accent-color: var(--red); cursor: pointer; vertical-align: middle; }
+  .step-head .done-label input { accent-color: #fff; }
+  h2.is-done { color: #999; border-bottom-color: #ddd; }
+  .step.is-done .step-head { background: #9e9e9e; }
+  .step.is-done .step-body { border-color: #ddd; }
+  .totop { position: fixed; right: 24px; bottom: 24px; background: var(--red); color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+  @media (max-width: 900px) { .sidebar { position: fixed; z-index: 10; } main { padding: 56px 16px 60px 16px; } body.nav-collapsed main { padding-left: 16px; } }
+  @media print { .sidebar, .totop, #nav-toggle, a.anchor, a.back, .done-label { display: none; } .layout { display: block; } main { max-width: none; padding: 0; } a { color: inherit; text-decoration: none; } details.deep { border: none; } details.deep summary { display: none; } details.deep .deep-body { display: block; } }
+</style>
+</head>
+<body id="top">
+<button id="nav-toggle">✕</button>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-title">🔷 TypeScript Lab</div>
+<div class="progress"><div class="bar"><div class="fill" id="progress-fill"></div></div><div class="ptext" id="progress-text">0 / 0</div></div>
+<ul>
+<li><a href="#sec-1" data-key="sec-1"><span class="mark"></span>1. Зачем типы</a>
+</li>
+<li><a href="#sec-2" data-key="sec-2"><span class="mark"></span>2. Азбука TypeScript</a>
+</li>
+<li><a href="#sec-3" data-key="sec-3"><span class="mark"></span>3. Структурная типизация и сужение</a>
+</li>
+<li><a href="#sec-4" data-key="sec-4"><span class="mark"></span>4. Generics и утилиты</a>
+</li>
+<li><a href="#sec-5" data-key="sec-5"><span class="mark"></span>5. Границы и валидация</a>
+</li>
+<li><a href="#sec-6" data-key="sec-6"><span class="mark"></span>6. Классы в TS</a>
+</li>
+<li><a href="#sec-7" data-key="sec-7"><span class="mark"></span>7. Инструменты</a>
+</li>
+<li><a href="#sec-8" data-key="sec-8"><span class="mark"></span>8. Архитектура проекта</a>
+</li>
+<li><a href="#sec-9" data-key="sec-9"><span class="mark"></span>9. Задания (5 сессий)</a>
+<ul class="nav-steps">
+<li class="nav-session"><a href="#session-1">Сессия 1</a></li>
+<li><a href="#step-1-1" data-key="step-1-1"><span class="mark"></span>1.1 Стенд</a></li>
+<li><a href="#step-1-2" data-key="step-1-2"><span class="mark"></span>1.2 От JS к TS</a></li>
+<li><a href="#step-1-3" data-key="step-1-3"><span class="mark"></span>1.3 Union, литералы, as const</a></li>
+<li><a href="#step-1-4" data-key="step-1-4"><span class="mark"></span>1.4 Функции, unknown/never</a></li>
+<li><a href="#step-1-5" data-key="step-1-5"><span class="mark"></span>1.5 strict + первый тест</a></li>
+<li class="nav-session"><a href="#session-2">Сессия 2</a></li>
+<li><a href="#step-2-1" data-key="step-2-1"><span class="mark"></span>2.1 Branded IDs + Result</a></li>
+<li><a href="#step-2-2" data-key="step-2-2"><span class="mark"></span>2.2 Movement + exhaustive switch</a></li>
+<li><a href="#step-2-3" data-key="step-2-3"><span class="mark"></span>2.3 applyMovement + StockError</a></li>
+<li><a href="#step-2-4" data-key="step-2-4"><span class="mark"></span>2.4 Guards руками + index.ts</a></li>
+<li class="nav-session"><a href="#session-3">Сессия 3</a></li>
+<li><a href="#step-3-1" data-key="step-3-1"><span class="mark"></span>3.1 Repository&lt;T&gt;</a></li>
+<li><a href="#step-3-2" data-key="step-3-2"><span class="mark"></span>3.2 TypedEmitter&lt;Events&gt;</a></li>
+<li><a href="#step-3-3" data-key="step-3-3"><span class="mark"></span>3.3 Утилиты + satisfies</a></li>
+<li><a href="#step-3-4" data-key="step-3-4"><span class="mark"></span>3.4 Сервис Warehouse</a></li>
+<li class="nav-session"><a href="#session-4">Сессия 4</a></li>
+<li><a href="#step-4-1" data-key="step-4-1"><span class="mark"></span>4.1 parseArgs + команды + satisfies</a></li>
+<li><a href="#step-4-2" data-key="step-4-2"><span class="mark"></span>4.2 Zod + import:csv</a></li>
+<li><a href="#step-4-3" data-key="step-4-3"><span class="mark"></span>4.3 .d.ts и declare</a></li>
+<li><a href="#step-4-4" data-key="step-4-4"><span class="mark"></span>4.4 Сборка esbuild</a></li>
+<li class="nav-session"><a href="#session-5">Сессия 5</a></li>
+<li><a href="#step-5-1" data-key="step-5-1"><span class="mark"></span>5.1 ApiContract + typed client</a></li>
+<li><a href="#step-5-2" data-key="step-5-2"><span class="mark"></span>5.2 Express по контракту</a></li>
+<li><a href="#step-5-3" data-key="step-5-3"><span class="mark"></span>5.3 Vue + TS по контракту</a></li>
+<li><a href="#step-5-4" data-key="step-5-4"><span class="mark"></span>5.4 Финал: до / после</a></li>
+</ul>
+</li>
+<li><a href="#sec-10" data-key="sec-10"><span class="mark"></span>10. Чек-лист концепций</a>
+</li>
+<li><a href="#sec-11" data-key="sec-11"><span class="mark"></span>11. Глоссарий</a>
+</li>
+<li><a href="#sec-12" data-key="sec-12"><span class="mark"></span>12. Вопросы на понимание</a>
+</li>
+<li><a href="#sec-13" data-key="sec-13"><span class="mark"></span>13. Что дальше</a>
+</li>
+</ul><button class="reset" id="reset-progress" title="Сбросить все галочки">Сбросить прогресс</button></nav>
+<main>
+
+<h1>🔷 TypeScript Lab — Warehouse</h1>
+<p class="subtitle">TypeScript с нуля: от аннотаций до generics, сужения типов, mapped/conditional types и валидации на границах — на складском CLI-инструменте, который в конце становится типизированным API с Vue-фронтендом. Стек: TypeScript 5.6 + Node 22 + tsx + Vitest + Zod; в финале Express и Vue 3 + TS.</p>
+
+<div class="toc"><b>Как устроена лаба.</b> Разделы 1–8 — теория: зачем типы, азбука, структурная типизация и сужение, generics и типы-утилиты, границы и валидация, классы, инструменты, архитектура. Раздел 9 — пять сессий: чистый TS в песочнице → домен склада → generics и типизированные абстракции → CLI с парсингом, Zod и .d.ts → сквозная типизация API + Vue. Каждый шаг: код → «зачем» → команда → ожидаемый результат → «проверь себя». Разделы 10–13 — чек-лист, глоссарий, вопросы, что дальше.
+<p class="small">Отдельный репозиторий (npm workspaces: <code>packages/core</code>, <code>cli</code>, <code>api</code>, <code>web</code>). Никаких фреймворков до сессии 5: TypeScript нужно увидеть в чистом виде, чтобы потом узнавать его в Nest и Vue. Node 22 в Docker, как в остальных лабах. Знания JS предполагаются на уровне «писал на нём»; ООП-концепции — из ООП-лабы (ссылки по тексту).</p></div>
+
+<h2 id="sec-1"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-1"></label>1. Зачем типы: что TypeScript ловит, а что нет <a class="anchor" href="#sec-1">#</a></h2>
+
+<p>Функция на JavaScript: списать товар со склада.</p>
+<pre><code>function withdraw(stock, itemId, location, qty) {
+  const key = itemId + '@' + location
+  if (stock[key] &lt; qty) return { ok: false, error: 'not enough' }
+  stock[key] -= qty
+  return { ok: true, left: stock[key] }
+}
+
+withdraw(stock, 'bolt-m6', 'A1', '5')        // строка '5': сравнение сработает, вычитание даст NaN — молча
+withdraw(stock, 'bolt-m6', 'A1')             // qty undefined → NaN
+const r = withdraw(stock, 'bolt-m6', 'A1', 5)
+console.log(r.left.toFixed(2))               // если ok: false — r.left undefined → TypeError в рантайме
+withdraw(stock, 'bolt-m6', 5, 'A1')          // аргументы перепутаны — ключ '5@A1', ошибка не появится никогда</code></pre>
+
+<p>Четыре вызова, четыре бага, ноль ошибок в момент написания. Та же функция с типами:</p>
+<pre><code>type Stock = Record&lt;string, number&gt;
+type WithdrawResult = { ok: true; left: number } | { ok: false; error: string }
+
+function withdraw(stock: Stock, itemId: string, location: string, qty: number): WithdrawResult { /* тот же код */ }
+
+withdraw(stock, 'bolt-m6', 'A1', '5')        // ✖ Argument of type 'string' is not assignable to parameter of type 'number'
+withdraw(stock, 'bolt-m6', 'A1')             // ✖ Expected 4 arguments, but got 3
+const r = withdraw(stock, 'bolt-m6', 'A1', 5)
+r.left.toFixed(2)                            // ✖ Property 'left' does not exist on type '{ ok: false; error: string }'
+if (r.ok) r.left.toFixed(2)                  // ✔ внутри if TS знает, что r — успешная ветка
+withdraw(stock, 'bolt-m6', 5, 'A1')          // ✖ 'number' is not assignable to 'string'  — ловится… а перепутанные строки? см. сессию 2, branded types</code></pre>
+
+<table>
+<tr><th>Что TypeScript ловит</th><th>Чего не ловит</th></tr>
+<tr><td>неправильный тип аргумента, лишние/недостающие аргументы</td><td>логические ошибки: <code>&lt;</code> вместо <code>&lt;=</code></td></tr>
+<tr><td>обращение к полю, которого может не быть (<code>r.left</code> при <code>ok: false</code>)</td><td>данные из JSON/сети/файла: там тип — то, что вы <i>пообещали</i>, а не что пришло (раздел 5)</td></tr>
+<tr><td>опечатки в именах полей и методов</td><td>перепутанные аргументы одного типа (<code>itemId</code> и <code>location</code> — обе строки) — если не помочь (branded types)</td></tr>
+<tr><td>необработанный <code>null/undefined</code> (в strict-режиме)</td><td>всё, что происходит после <code>as any</code></td></tr>
+<tr><td>неполный <code>switch</code> по вариантам (exhaustiveness)</td><td>ошибки во время выполнения вообще: типы стираются при компиляции</td></tr>
+</table>
+<p><b>Что такое TypeScript на самом деле.</b> Это JavaScript плюс <i>описание</i> того, какие значения где допустимы. Компилятор <code>tsc</code> проверяет описания и <b>выбрасывает их</b>: в рантайме работает обычный JS, никаких проверок типов там нет. Отсюда две вещи, которые важно принять сразу: (1) типы — это документация, которую проверяет машина; (2) на границе с внешним миром (JSON, argv, файл, HTTP) типы надо <i>проверять</i> кодом, а не объявлять.</p>
+<div class="insight-box"><span class="tag">ГЛАВНАЯ МЫСЛЬ ЛАБЫ</span><p>Хороший TypeScript — не «расставить <code>: string</code> везде». Это <b>сделать невозможные состояния невыразимыми</b>: результат либо успех с данными, либо ошибка с причиной — и никогда «и то и другое»; перемещение товара имеет <code>from</code> и <code>to</code>, а приход — только <code>to</code>; ID товара нельзя случайно передать вместо ID склада. Когда тип точно описывает область допустимого, компилятор находит баги за вас, а IDE — пишет половину кода. Каждое задание — про то, как сузить тип до ровно того, что допустимо.</p></div>
+<div class="next-box"><span class="tag">ПЕРЕД РАЗДЕЛОМ <a href="#sec-2">2</a></span><ul>
+<li>📖 Пробежаться: <a href="https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html" target="_blank">TypeScript for JavaScript Programmers</a> — 5 минут, чтобы глаз привык к синтаксису.</li>
+</ul></div>
+
+<h2 id="sec-2"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-2"></label>2. Азбука TypeScript <a class="anchor" href="#sec-2">#</a></h2>
+
+<p>Шестнадцать вещей, без которых не прочитать ни одного файла. Каждая — определение и несколько строк на примере склада. В сессии 1 всё это пишется руками.</p>
+
+<h3>2.1 Аннотации и вывод типов</h3>
+<p><code>: тип</code> после имени. Но чаще тип <b>выводится</b> из значения — аннотируйте параметры функций и публичные контракты, а локальные переменные оставляйте выводу.</p>
+<pre><code>let qty = 5                         // number — выведено; qty = 'x' → ошибка
+const sku = 'bolt-m6'               // тип — литерал 'bolt-m6' (const не переприсвоить), а не string
+let name: string                    // аннотация без значения — использовать до присваивания нельзя
+function total(prices: number[]): number { return prices.reduce((a, b) =&gt; a + b, 0) }   // параметры — всегда; возврат — по желанию</code></pre>
+
+<h3>2.2 Примитивы, массивы, кортежи</h3>
+<pre><code>const a: string = 'A1', n: number = 3, b: boolean = true, big: bigint = 10n
+const units: string[] = ['pcs', 'kg']          // массив строк; units.push(5) → ошибка
+const pair: [string, number] = ['bolt', 3]     // кортеж: фиксированная длина и типы по позициям
+const [id, count] = pair                       // id: string, count: number
+const nothing: null = null, undef: undefined = undefined</code></pre>
+
+<h3>2.3 Объекты, optional, readonly</h3>
+<pre><code>type Item = {
+  id: string
+  name: string
+  minStock?: number          // необязательное: number | undefined
+  readonly sku: string       // нельзя переприсвоить после создания
+}
+const bolt: Item = { id: '1', name: 'Болт M6', sku: 'bolt-m6' }
+bolt.sku = 'x'               // ✖ Cannot assign to 'sku' because it is a read-only property
+bolt.minStock.toFixed()      // ✖ 'minStock' is possibly 'undefined'  →  bolt.minStock?.toFixed()
+const x: Item = { id: '1', name: 'n', sku: 's', color: 'red' }   // ✖ Object literal may only specify known properties</code></pre>
+
+<h3>2.4 Union и литеральные типы</h3>
+<p><code>A | B</code> — значение одного из типов. Литерал — конкретное значение как тип: <code>'in' | 'out'</code>. Это замена enum'ам в 90 % случаев и основа размеченных объединений (раздел 3).</p>
+<pre><code>type Unit = 'pcs' | 'kg' | 'l'
+let u: Unit = 'kg'
+u = 'box'                                   // ✖ Type '"box"' is not assignable to type 'Unit'
+type Qty = number | 'unknown'
+function show(q: Qty) { return typeof q === 'number' ? q.toFixed(1) : '—' }   // сужение через typeof</code></pre>
+
+<h3>2.5 type vs interface</h3>
+<p>Оба описывают форму объекта. <code>interface</code> — только объекты, умеет <code>extends</code> и слияние деклараций (раздел 5). <code>type</code> — любой тип: union, кортеж, примитив, mapped. Правило лабы: <b><code>type</code> по умолчанию</b>, <code>interface</code> — для контрактов, которые реализуют классы (<code>implements</code>) или расширяют библиотеки.</p>
+<pre><code>interface Entity { readonly id: string }
+interface Item extends Entity { name: string }              // расширение
+type Movement = MoveIn | MoveOut                             // union — только type
+type ItemWithStock = Item &amp; { stock: number }                // пересечение — «и то, и другое»</code></pre>
+
+<h3>2.6 Функции</h3>
+<pre><code>function apply(stock: Stock, qty: number, note?: string): Stock { … }          // optional-параметр — только в конце
+function log(msg: string, level: 'info' | 'warn' = 'info'): void { … }         // значение по умолчанию → тип выведен
+const add = (a: number, b: number): number =&gt; a + b                            // стрелочная
+type Formatter = (value: number, unit: Unit) =&gt; string                          // тип функции
+function each(items: Item[], cb: (item: Item, i: number) =&gt; void): void { … }  // колбэк с типом
+function sum(...nums: number[]): number { … }                                   // rest</code></pre>
+
+<h3>2.7 any, unknown, never, void</h3>
+<table>
+<tr><th>Тип</th><th>Смысл</th><th>Когда</th></tr>
+<tr><td><code>any</code></td><td>«выключить проверку»: всё можно</td><td>никогда в своём коде; иногда при миграции с JS. <code>noImplicitAny</code> запрещает неявный</td></tr>
+<tr><td><code>unknown</code></td><td>«что угодно, но сначала проверь»: ничего нельзя, пока не сузили</td><td>всё, что пришло извне: <code>JSON.parse</code>, <code>catch (e)</code>, тело запроса</td></tr>
+<tr><td><code>never</code></td><td>значений нет: функция не возвращает (бросает), ветка недостижима</td><td>exhaustiveness-проверка в <code>switch</code> (раздел 3), тип ошибки в <code>Result&lt;T, never&gt;</code></td></tr>
+<tr><td><code>void</code></td><td>функция ничего не возвращает</td><td>обработчики, колбэки</td></tr>
+</table>
+<pre><code>const data: unknown = JSON.parse(text)
+data.items                                   // ✖ 'data' is of type 'unknown'
+if (typeof data === 'object' &amp;&amp; data !== null &amp;&amp; 'items' in data) { … }        // сужение → можно
+function fail(msg: string): never { throw new Error(msg) }</code></pre>
+
+<h3>2.8 null и undefined в strict-режиме</h3>
+<p>С <code>strictNullChecks</code> (включён в <code>strict</code>) <code>null</code> и <code>undefined</code> — отдельные типы, и TS не даст обратиться к полю значения, которое <i>может</i> быть пустым. Инструменты: <code>?.</code>, <code>??</code>, сужение <code>if</code>, и в крайнем случае <code>!</code> (обещание «точно не пусто» — на вашей совести).</p>
+<pre><code>const item = items.find(i =&gt; i.sku === sku)        // Item | undefined
+item.name                                          // ✖ 'item' is possibly 'undefined'
+item?.name ?? 'не найден'                          // ✔
+if (!item) throw new Error('not found'); item.name // ✔ после проверки — Item
+item!.name                                         // ✔ компилируется; в рантайме упадёт, если undefined</code></pre>
+
+<h3>2.9 enum vs as const</h3>
+<pre><code>enum Unit { Pcs = 'pcs', Kg = 'kg' }                  // генерирует объект в рантайме; синтаксис не из JS
+const UNITS = ['pcs', 'kg', 'l'] as const              // readonly-кортеж литералов: обычный JS
+type Unit = (typeof UNITS)[number]                     // 'pcs' | 'kg' | 'l' — тип выведен из значения
+UNITS.includes(x as Unit)                              // список для валидации в рантайме — бесплатно</code></pre>
+<p>В лабе — <code>as const</code> + вывод типа: одно значение даёт и рантайм-список, и тип. <code>enum</code> оставляем для чужого кода (в Nest он встречается).</p>
+<h3>2.10 Приведение: as и satisfies</h3>
+<pre><code>const el = document.querySelector('#qty') as HTMLInputElement   // «я знаю лучше»: TS верит; ошибка проявится в рантайме
+const cfg = { units: ['pcs', 'kg'], maxQty: 1000 } satisfies Config   // проверить соответствие, НЕ меняя выведенный тип
+cfg.units[0]                                                     // 'pcs' | 'kg' — литералы сохранились (с `: Config` было бы string)</code></pre>
+
+<h3>2.11 Generics — тип как параметр</h3>
+<p>Функция, работающая с любым типом, но <i>сохраняющая</i> его: <code>first(items: Item[]): Item</code>, <code>first(nums: number[]): number</code> — одна функция <code>first&lt;T&gt;(items: T[]): T</code>. <code>T</code> подставляется при вызове, обычно выводится. Подробно — раздел 4.</p>
+<pre><code>function first&lt;T&gt;(items: T[]): T | undefined { return items[0] }
+const i = first(items)          // Item | undefined — T выведен как Item
+const n = first([1, 2, 3])      // number | undefined
+function byId&lt;T extends { id: string }&gt;(list: T[], id: string): T | undefined   // ограничение: T должен иметь id</code></pre>
+
+<h3>2.12 keyof, typeof, индексный доступ</h3>
+<pre><code>type ItemKey = keyof Item              // 'id' | 'name' | 'minStock' | 'sku'
+type Config = typeof cfg               // тип из значения (typeof в позиции типа — не рантайм-typeof)
+type Unit = Item['unit']               // тип поля
+type FirstUnit = (typeof UNITS)[0]     // 'pcs'</code></pre>
+
+<h3>2.13 Классы</h3>
+<p>Как в ООП-лабе на PHP, но с выводом типов: модификаторы <code>public/private/protected</code>, <code>readonly</code>, параметры-свойства в конструкторе, <code>abstract</code>, <code>implements</code>. <code>private</code> в TS — проверка компилятора (стирается); <code>#field</code> — настоящая приватность JS. Раздел 6.</p>
+
+<h3>2.14 Модули</h3>
+<p><code>import/export</code> как в ES-модулях. <code>import type { Item }</code> — импорт только типа (стирается; с <code>verbatimModuleSyntax</code> обязателен для типов). Расширение <code>.js</code> в путях при <code>module: NodeNext</code> — да, даже для <code>.ts</code>-файлов: так требует Node ESM.</p>
+
+<h3>2.15 Ошибки компилятора — как читать</h3>
+<pre><code>src/stock.ts:12:5 - error TS2322: Type 'string' is not assignable to type 'number'.
+                                   ^^^^^^^^^^^^^^^  что пришло        ^^^^^^^^^^^  что ожидалось
+12     stock[key] = qty
+       ~~~~~~~~~~  — где</code></pre>
+<p>Читайте с конца сообщения: «ожидалось X, получено Y». Длинные ошибки про generics читаются снизу вверх: последняя строка — реальная причина. Код TS2322 можно загуглить.</p>
+<h3>2.16 tsconfig — минимум, который надо понимать</h3>
+<table>
+<tr><th>Опция</th><th>Что делает</th><th>В лабе</th></tr>
+<tr><td><code>strict</code></td><td>включает всё строгое: noImplicitAny, strictNullChecks, strictFunctionTypes…</td><td>всегда <code>true</code>; проекты без strict — это JS с подсказками</td></tr>
+<tr><td><code>noUncheckedIndexedAccess</code></td><td><code>arr[i]</code> и <code>obj[key]</code> — <code>T | undefined</code></td><td><code>true</code>: честно про массивы и словари</td></tr>
+<tr><td><code>target</code> / <code>module</code></td><td>во что компилировать / какая система модулей</td><td><code>ES2022</code> / <code>NodeNext</code></td></tr>
+<tr><td><code>verbatimModuleSyntax</code></td><td>импорты типов — только через <code>import type</code></td><td><code>true</code>: видно, что стирается</td></tr>
+<tr><td><code>noEmit</code></td><td>только проверять, не генерировать JS</td><td>для <code>npm run typecheck</code>; запуск через tsx, сборка через esbuild</td></tr>
+<tr><td><code>skipLibCheck</code></td><td>не проверять <code>.d.ts</code> зависимостей</td><td><code>true</code> — быстрее</td></tr>
+</table>
+<div class="next-box"><span class="tag">ПЕРЕД РАЗДЕЛОМ <a href="#sec-3">3</a></span><ul>
+<li>✅ Хочется потрогать — сессия 1 повторяет 2.1–2.12 кодом в песочнице. Разделы 3–8 можно читать после неё.</li>
+</ul></div>
+
+<h2 id="sec-3"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-3"></label>3. Структурная типизация и сужение <a class="anchor" href="#sec-3">#</a></h2>
+
+<h3>3.1 Структурная типизация — «утиная» с проверкой</h3>
+<p>В TS тип — это <i>форма</i>. Если у значения есть все нужные поля нужных типов, оно подходит, как бы ни назывался его тип. Имя типа не важно; важна структура.</p>
+<pre><code>interface Entity { id: string }
+const item = { id: '1', name: 'Болт' }
+const e: Entity = item                 // ✔ лишнее поле name не мешает: у item есть всё, что нужно Entity
+const e2: Entity = { id: '1', name: 'Болт' }   // ✖ а вот литерал прямо в аннотацию — «лишние свойства» (excess property check)
+
+type ItemId = string; type LocationId = string
+function move(item: ItemId, loc: LocationId) {}
+move(locationId, itemId)               // ✔ компилируется: оба — string. Структурно одинаковы. Решение — branded types, сессия 2</code></pre>
+
+<h3>3.2 Сужение (narrowing) — TS следит за if</h3>
+<p>Внутри условия TS «знает», что проверка прошла, и сужает тип переменной. Способы:</p>
+<table>
+<tr><th>Приём</th><th>Пример</th><th>Сужает</th></tr>
+<tr><td><code>typeof</code></td><td><code>if (typeof q === 'number')</code></td><td>примитивы</td></tr>
+<tr><td><code>instanceof</code></td><td><code>if (e instanceof CliError)</code></td><td>классы</td></tr>
+<tr><td><code>in</code></td><td><code>if ('from' in m)</code></td><td>объекты по наличию поля</td></tr>
+<tr><td>проверка на истинность</td><td><code>if (item)</code>, <code>item?.name</code></td><td><code>T | undefined | null</code> → <code>T</code></td></tr>
+<tr><td>равенство с литералом</td><td><code>if (m.kind === 'transfer')</code></td><td><b>размеченные объединения</b> — главный приём</td></tr>
+<tr><td>type predicate</td><td><code>function isItem(x: unknown): x is Item</code></td><td>своя проверка, которой TS верит</td></tr>
+<tr><td>assertion function</td><td><code>function assertItem(x: unknown): asserts x is Item</code></td><td>бросает, если нет; после вызова — сужено</td></tr>
+</table>
+
+<h3>3.3 Размеченное объединение (discriminated union) — сердце лабы</h3>
+<pre><code>type Movement =
+  | { kind: 'in';       itemId: string; to: string;   qty: number; unitCost: number }
+  | { kind: 'out';      itemId: string; from: string; qty: number; reason: 'sale' | 'writeoff' }
+  | { kind: 'transfer'; itemId: string; from: string; to: string; qty: number }
+
+function describe(m: Movement): string {
+  switch (m.kind) {                         // kind — дискриминант: литерал, уникальный в каждом варианте
+    case 'in':       return `+${m.qty} → ${m.to} по ${m.unitCost}`     // здесь m — только вариант 'in': есть unitCost, нет from
+    case 'out':      return `−${m.qty} из ${m.from} (${m.reason})`
+    case 'transfer': return `${m.qty}: ${m.from} → ${m.to}`
+    default:         return assertNever(m)  // m здесь — never: все варианты разобраны. Добавите 4-й вариант — ошибка компиляции ЗДЕСЬ
+  }
+}
+function assertNever(x: never): never { throw new Error(`unexpected: ${JSON.stringify(x)}`) }</code></pre>
+
+<p>Сравните с одним типом <code>{ kind: string; from?: string; to?: string; unitCost?: number; reason?: string }</code>: у прихода <i>может</i> быть <code>from</code>, у расхода — <code>unitCost</code>, и каждое использование — <code>if (m.from)</code> с молитвой. Размеченное объединение делает неправильные комбинации <b>невыразимыми</b>, а <code>assertNever</code> превращает «забыли обработать новый вариант» в ошибку компиляции.</p>
+<details class="deep"><summary>🔬 Под капотом: type predicate и assertion function — как научить TS своей проверке</summary><div class="deep-body">
+
+<pre><code>function isMovement(x: unknown): x is Movement {          // возвращает boolean, но TS запоминает: true ⇒ x: Movement
+  return typeof x === 'object' &amp;&amp; x !== null &amp;&amp; 'kind' in x &amp;&amp; ['in', 'out', 'transfer'].includes((x as { kind: unknown }).kind as string)
+}
+function assertMovement(x: unknown): asserts x is Movement {   // после вызова x сужен во всём остальном коде
+  if (!isMovement(x)) throw new TypeError('not a movement')
+}
+const raw: unknown = JSON.parse(line)
+if (isMovement(raw)) describe(raw)        // ✔
+assertMovement(raw); describe(raw)        // ✔</code></pre>
+<p>Опасность: predicate — это <i>ваше обещание</i>. Если внутри проверка неполная (проверили <code>kind</code>, не проверили <code>qty</code>), TS всё равно поверит. Поэтому на настоящих границах — Zod (раздел 5), который строит проверку из схемы и не даст соврать.</p>
+</div></details>
+
+<h2 id="sec-4"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-4"></label>4. Generics и типы-утилиты <a class="anchor" href="#sec-4">#</a></h2>
+
+<h3>4.1 Generics — параметризация типом</h3>
+<pre><code>// функция
+function groupBy&lt;T, K extends keyof T&gt;(list: T[], key: K): Map&lt;T[K], T[]&gt; { … }
+groupBy(movements, 'kind')            // Map&lt;'in' | 'out' | 'transfer', Movement[]&gt; — K выведен как 'kind', T[K] — тип поля
+
+// тип
+type Result&lt;T, E&gt; = { ok: true; value: T } | { ok: false; error: E }
+type Paginated&lt;T&gt; = { items: T[]; total: number; page: number }
+
+// класс / интерфейс
+interface Repository&lt;T extends { id: string }&gt; { get(id: string): T | undefined; save(e: T): void }
+class InMemoryRepository&lt;T extends { id: string }&gt; implements Repository&lt;T&gt; { … }
+const items = new InMemoryRepository&lt;Item&gt;()
+
+// ограничения и значения по умолчанию
+function pluck&lt;T, K extends keyof T&gt;(obj: T, key: K): T[K]
+type ApiResponse&lt;T = unknown&gt; = { data: T; status: number }</code></pre>
+<p>Правило: generic нужен, когда тип <i>на входе</i> должен сохраниться <i>на выходе</i>. Если <code>T</code> встречается один раз — это <code>unknown</code>, а не generic.</p>
+<h3>4.2 Встроенные утилиты — mapped types, которые уже написали за вас</h3>
+<table>
+<tr><th>Утилита</th><th>Что делает</th><th>В лабе</th></tr>
+<tr><td><code>Partial&lt;T&gt;</code></td><td>все поля необязательны</td><td><code>patch: Partial&lt;Item&gt;</code>, фильтр <code>where?: Partial&lt;T&gt;</code></td></tr>
+<tr><td><code>Required&lt;T&gt;</code></td><td>все обязательны</td><td>после заполнения дефолтов</td></tr>
+<tr><td><code>Readonly&lt;T&gt;</code></td><td>все readonly</td><td>снимок состояния склада</td></tr>
+<tr><td><code>Pick&lt;T, K&gt;</code> / <code>Omit&lt;T, K&gt;</code></td><td>выбрать / выкинуть поля</td><td><code>NewItem = Omit&lt;Item, 'id'&gt;</code></td></tr>
+<tr><td><code>Record&lt;K, V&gt;</code></td><td>объект с ключами K и значениями V</td><td><code>Record&lt;LocationId, number&gt;</code></td></tr>
+<tr><td><code>Extract&lt;U, M&gt;</code> / <code>Exclude&lt;U, M&gt;</code></td><td>из union оставить / убрать подходящие</td><td><code>MovementOf&lt;'in'&gt; = Extract&lt;Movement, { kind: 'in' }&gt;</code></td></tr>
+<tr><td><code>ReturnType&lt;F&gt;</code> / <code>Parameters&lt;F&gt;</code></td><td>тип результата / аргументов функции</td><td>тип store из функции-фабрики</td></tr>
+<tr><td><code>NonNullable&lt;T&gt;</code></td><td>убрать null/undefined</td><td>после <code>.filter(Boolean)</code></td></tr>
+<tr><td><code>Awaited&lt;T&gt;</code></td><td>что внутри Promise</td><td>тип ответа API</td></tr>
+</table>
+
+<h3>4.3 Mapped, conditional, template literal — как утилиты устроены</h3>
+<pre><code>// mapped: пройти по ключам и построить новый тип
+type Partial&lt;T&gt;  = { [K in keyof T]?: T[K] }
+type Totals&lt;T&gt;   = { [K in keyof T]: number }                   // те же ключи, все значения number
+type Getters&lt;T&gt;  = { [K in keyof T as `get${Capitalize&lt;string &amp; K&gt;}`]: () =&gt; T[K] }   // переименование ключей
+
+// conditional: если-то на уровне типов; распределяется по union
+type Unwrap&lt;T&gt; = T extends Promise&lt;infer U&gt; ? U : T             // infer — «вытащи то, что там внутри»
+type Extract&lt;U, M&gt; = U extends M ? U : never                    // для каждого варианта union отдельно
+
+// template literal: строки как типы
+type Group = 'item' | 'stock'
+type Action = 'add' | 'list'
+type Command = `${Group}:${Action}`                             // 'item:add' | 'item:list' | 'stock:add' | 'stock:list'
+type EventName = `${Lowercase&lt;Group&gt;}.${string}`               // 'item.что-угодно'</code></pre>
+<p>Эти три механизма — весь «продвинутый TS». Их не надо изобретать каждый день; их надо <i>узнавать</i> в ошибках компилятора и в сигнатурах библиотек (Vue, Pinia, Zod, Express — всё на них).</p><details class="deep"><summary>🔬 Под капотом: распределительные условные типы и ловушка с never</summary><div class="deep-body">
+
+<p><code>type Ex&lt;U, M&gt; = U extends M ? U : never</code> при <code>U = 'a' | 'b' | 'c'</code> применяется к каждому члену отдельно и результаты объединяются — поэтому <code>Extract</code> работает. Чтобы <i>не</i> распределять, оборачивают в кортеж: <code>[U] extends [M] ? …</code>. И <code>never</code> в позиции <code>U</code> даёт <code>never</code> (пустой union → пустой результат) — источник загадочных «почему тип стал never». В сессии 3 это встретится в типе клиента API.</p>
+</div></details>
+
+<h2 id="sec-5"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-5"></label>5. Границы: unknown, Zod, .d.ts и чужой код <a class="anchor" href="#sec-5">#</a></h2>
+
+<p>Типы стираются. Значит, всё, что приходит извне, имеет тип <code>unknown</code> — что бы ни обещала документация. Три границы в лабе:</p>
+<pre>       argv / файл CSV / JSON / HTTP-тело            ←  unknown
+                    │
+                    ▼  проверка КОДОМ: Zod-схема (или свой type predicate)
+              Movement, Item, …                       ←  доверенные типы: дальше компилятор
+                    │
+                    ▼  ваш код
+              stdout / файл / HTTP-ответ              ←  сериализация; тип ответа — часть контракта (сессия 5)</pre>
+<pre><code>import { z } from 'zod'
+const MovementSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('in'),  itemId: z.string(), to: z.string(),   qty: z.number().positive(), unitCost: z.number().nonnegative() }),
+  z.object({ kind: z.literal('out'), itemId: z.string(), from: z.string(), qty: z.number().positive(), reason: z.enum(['sale', 'writeoff']) }),
+])
+type MovementInput = z.infer&lt;typeof MovementSchema&gt;       // тип ВЫВЕДЕН из схемы — один источник правды для рантайма и компилятора
+
+const parsed = MovementSchema.safeParse(JSON.parse(line))  // { success: true, data } | { success: false, error } — тоже размеченное объединение
+if (parsed.success) apply(parsed.data)</code></pre>
+
+<h3>Чужой код: .d.ts и DefinitelyTyped</h3>
+<table>
+<tr><th>Ситуация</th><th>Что делать</th></tr>
+<tr><td>библиотека написана на TS</td><td>типы внутри пакета, ничего не нужно</td></tr>
+<tr><td>библиотека на JS, типы есть в <code>@types/…</code></td><td><code>npm i -D @types/express</code> — DefinitelyTyped</td></tr>
+<tr><td>библиотека на JS без типов</td><td>написать <code>.d.ts</code>: <code>declare module 'legacy-table' { export function render(rows: string[][]): string }</code></td></tr>
+<tr><td>свой старый JS-файл в проекте</td><td>рядом <code>table.d.ts</code> с сигнатурами (сессия 4) или <code>allowJs</code> + JSDoc</td></tr>
+<tr><td>глобальная переменная от скрипта</td><td><code>declare const __APP_VERSION__: string</code></td></tr>
+<tr><td>расширить чужой тип (добавить поле в <code>Request</code>)</td><td>declaration merging: <code>declare module 'express' { interface Request { user?: User } }</code></td></tr>
+</table>
+<p><code>.d.ts</code> — файл только с типами, без реализации. Так устроены типы всего npm. Ключевое слово <code>declare</code> — «это существует где-то, я только описываю форму».</p>
+
+<h2 id="sec-6"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-6"></label>6. Классы в TypeScript — коротко <a class="anchor" href="#sec-6">#</a></h2>
+<pre><code>abstract class Repository&lt;T extends Entity&gt; {                      // abstract — как в PHP
+  protected readonly items = new Map&lt;string, T&gt;()                  // модификатор + readonly + вывод типа Map&lt;string, T&gt;
+  constructor(private readonly name: string) {}                    // параметр-свойство: объявить + присвоить одной строкой
+  abstract persist(): void                                         // дырка
+  save(entity: T): void { this.items.set(entity.id, entity); this.persist() }
+  get size(): number { return this.items.size }                    // геттер
+  #secret = 1                                                      // настоящее приватное поле JS (не стирается)
+}
+class InMemoryRepository&lt;T extends Entity&gt; extends Repository&lt;T&gt; { persist() {} }
+class JsonRepository&lt;T extends Entity&gt; extends Repository&lt;T&gt; implements Closeable { … }   // implements — проверка формы</code></pre>
+
+<p>Всё, что вы знаете из ООП-лабы, здесь работает так же; отличия: (1) <code>private</code> TS — проверка только компилятором, в JS поле доступно; (2) <code>implements</code> проверяет структуру, а не «регистрирует» интерфейс — класс без <code>implements</code>, но с нужными методами, тоже подойдёт; (3) generics у классов; (4) в TS-мире композиция функций и объектов встречается чаще классов — <code>Result</code>, <code>Movement</code> в лабе это просто объекты.</p>
+
+<h2 id="sec-7"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-7"></label>7. Инструменты <a class="anchor" href="#sec-7">#</a></h2>
+
+<table>
+<tr><th>Инструмент</th><th>Роль</th><th>Команда в лабе</th></tr>
+<tr><td><code>typescript</code> (tsc)</td><td>проверка типов; сборка (мы — только проверка)</td><td><code>npm run typecheck</code> → <code>tsc --noEmit -p …</code></td></tr>
+<tr><td><code>tsx</code></td><td>запуск <code>.ts</code> напрямую (esbuild под капотом, типы не проверяет)</td><td><code>npx tsx src/main.ts</code>, <code>tsx watch</code></td></tr>
+<tr><td><code>vitest</code></td><td>тесты; <code>expectTypeOf</code> — тесты на типы</td><td><code>npm test</code></td></tr>
+<tr><td><code>esbuild</code></td><td>сборка CLI в один JS-файл</td><td><code>npm run build</code> в сессии 4</td></tr>
+<tr><td><code>zod</code></td><td>схемы = валидация + вывод типов</td><td>сессии 4–5</td></tr>
+<tr><td><code>vue-tsc</code></td><td>проверка типов в <code>.vue</code></td><td>сессия 5</td></tr>
+<tr><td>IDE</td><td>90 % пользы TS — подсказки и ошибки до запуска</td><td>VS Code / WebStorm; наводите курсор на всё</td></tr>
+</table>
+<p>Разделение «tsx запускает, tsc проверяет» — стандарт: проверка типов не обязана стоять на пути к запуску, но обязана быть в CI и перед коммитом.</p>
+
+<h2 id="sec-8"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-8"></label>8. Структура проекта и поток данных <a class="anchor" href="#sec-8">#</a></h2>
+<pre>ts-warehouse-lab/
+├── docker-compose.yml               один контейнер node:22 (dev), порты 3000 (api) и 5173 (web)
+├── package.json                     workspaces: packages/*; общие devDependencies (typescript, tsx, vitest)
+├── tsconfig.base.json               strict + noUncheckedIndexedAccess + NodeNext + verbatimModuleSyntax
+└── packages/
+    ├── core/                        чистый TS, ноль зависимостей (кроме zod в сессии 4)
+    │   └── src/
+    │       ├── playground/          сессия 1: 01–05_*.ts — песочница
+    │       ├── domain/              ids (branded), item, location, movement (union), stock (apply + Result + errors)
+    │       ├── lib/                 result, typed-emitter, repository (interface + InMemory + JsonFile), group-by
+    │       ├── warehouse.ts         сервис: репозитории + emitter + apply
+    │       ├── schemas/             zod: MovementSchema, ItemSchema; z.infer ↔ доменные типы
+    │       ├── api-contract.ts      сессия 5: типы маршрутов, общие для api и web
+    │       └── index.ts             публичный API пакета
+    ├── cli/                         сессия 4: parseArgs, команды как union, import CSV, vendor/table.js + table.d.ts, esbuild → dist/
+    ├── api/                         сессия 5: Express + zod, реализует ApiContract
+    └── web/                         сессия 5: Vue 3 + TS: typed props/emits/store, клиент по ApiContract</pre>
+<pre>CLI:  argv ──parseArgs──▶ Command (union) ──▶ Warehouse.apply(Movement) ──▶ Result&lt;Stock, StockError&gt;
+                                                    │                             │
+      CSV ──zod──▶ MovementInput ──toMovement──▶     │                        ok → печать таблицы (vendor/table + .d.ts)
+                                                    │                        err → exhaustive switch по error.code → exit code
+                                            emitter.emit('stock.low', item, qty)
+
+API:  HTTP body ──zod──▶ MovementInput ──▶ Warehouse ──▶ Response&lt;ApiContract['POST /movements']['response']&gt;
+Web:  request('POST /movements', { body }) ──▶ Promise&lt;Result&lt;…&gt;&gt;  — тип выведен из того же ApiContract</pre>
+<div class="next-box"><span class="tag">ПЕРЕД РАЗДЕЛОМ <a href="#sec-9">9</a></span><ul>
+<li>📖 Почитать: <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html" target="_blank">Handbook: Everyday Types</a> и <a href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html" target="_blank">Narrowing</a> — 20 минут.</li>
+<li>✅ Docker; VS Code с встроенной поддержкой TS (или WebStorm).</li>
+</ul></div>
+
+<h2 id="sec-9"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-9"></label>9. Задания: пять сессий <a class="anchor" href="#sec-9">#</a></h2>
+
+<p>Порядок строгий. Ответы «проверь себя» — в <span class="file">docs/ts-notes.md</span>. Каждый шаг заканчивается зелёным <code>npm run typecheck</code> — это главный критерий.</p>
+<table>
+<tr><th>Сессия</th><th>Тема</th><th>Концепции</th><th>Результат</th></tr>
+<tr><td>1</td><td>Стенд и песочница</td><td>аннотации, вывод, примитивы, объекты, union/литералы, type/interface, функции, any/unknown/never, strict, as const</td><td>пять скриптов, которые компилируются без ошибок; первый тест</td></tr>
+<tr><td>2</td><td>Домен склада</td><td>branded IDs, размеченное объединение Movement, exhaustive switch, Result вместо исключений, type predicates, readonly</td><td><code>applyMovement</code> с тестами; невозможные состояния невыразимы</td></tr>
+<tr><td>3</td><td>Generics и абстракции</td><td>Repository&lt;T&gt;, TypedEmitter&lt;Events&gt;, утилиты, mapped/conditional/template literal, satisfies, тесты на типы</td><td>сервис Warehouse из типизированных кубиков</td></tr>
+<tr><td>4</td><td>CLI</td><td>parseArgs, команды как union из template literal, Zod и z.infer, ошибки и unknown в catch, .d.ts для JS, esbuild</td><td>рабочий <code>wh</code>: item:add, stock:in/out/transfer/list/low, import:csv</td></tr>
+<tr><td>5</td><td>Сквозная типизация</td><td>ApiContract, generic-клиент с conditional types, Express + zod, Vue 3 + TS (defineProps/Emits с generics, typed store), vue-tsc</td><td>тот же домен в API и в браузере с одним источником типов</td></tr>
+</table>
+<div class="session-banner" id="session-1">Сессия <a href="#session-1" style="color:#fff;text-decoration:none">1</a> — Стенд и песочница: от JS к типам <span>~2,5 часа</span></div>
+<div class="step" id="step-1-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-1"></label><span class="num">Шаг 1.1</span>Стенд: Docker, workspaces, tsconfig.base, tsx, vitest<a class="anchor" href="#step-1-1">#</a></span><div class="step-body">
+<pre><code>mkdir ts-warehouse-lab &amp;&amp; cd ts-warehouse-lab &amp;&amp; git init
+mkdir -p packages/core/src/playground docs</code></pre>
+<pre><code># docker-compose.yml
+services:
+  dev:
+    image: node:22
+    working_dir: /app
+    volumes: [.:/app]
+    command: sleep infinity           # команды запускаем через exec
+    ports: ["3000:3000", "5173:5173"]  # понадобятся в сессии 5</code></pre>
+<pre><code>// package.json (корень)
+{
+  "name": "ts-warehouse-lab",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "typecheck": "tsc --noEmit -p packages/core &amp;&amp; echo OK",
+    "test": "vitest run",
+    "play": "tsx"
+  },
+  "devDependencies": {
+    "typescript": "^5.6",
+    "tsx": "^4.19",
+    "vitest": "^2.1",
+    "@types/node": "^22"
+  }
+}
+
+// tsconfig.base.json — общий для всех пакетов
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  }
+}
+
+// packages/core/package.json
+{ "name": "@warehouse/core", "version": "0.0.0", "type": "module", "exports": { ".": "./src/index.ts" } }
+
+// packages/core/tsconfig.json
+{ "extends": "../../tsconfig.base.json", "include": ["src"] }
+
+// vitest.config.ts (корень)
+import { defineConfig } from 'vitest/config'
+export default defineConfig({ test: { include: ['packages/**/*.test.ts'] } })</code></pre>
+<pre><code>docker compose up -d
+docker compose exec dev npm install
+docker compose exec dev npm run typecheck        # OK (файлов ещё нет)</code></pre>
+<div class="why"><b>Зачем:</b> Workspaces с первого дня, чтобы в сессии 5 добавить <code>api</code> и <code>web</code>, не перестраивая репозиторий. <code>noEmit</code> в базовом конфиге: <code>tsc</code> у нас — только проверка; запускает <code>tsx</code>, собирает <code>esbuild</code>. <code>@types/node</code> — типы для <code>process</code>, <code>fs</code>, <code>node:util</code>: без них Node-API для TS не существует.</div>
+</div></div>
+<div class="step" id="step-1-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-2"></label><span class="num">Шаг 1.2</span>От JS к TS: аннотации, вывод, ошибки компилятора — <span class="file">playground/01_basics.ts</span><a class="anchor" href="#step-1-2">#</a></span><div class="step-body">
+<p>Тот же <code>withdraw</code> из раздела 1. Сначала переносим JS как есть в <code>.ts</code> — и смотрим, что скажет компилятор.</p><pre><code>// packages/core/src/playground/01_basics.ts — шаг А: JS в файле .ts
+function withdraw(stock, itemId, location, qty) {                     // ✖ Parameter 'stock' implicitly has an 'any' type. (×4)
+  const key = itemId + '@' + location
+  if (stock[key] &lt; qty) return { ok: false, error: 'not enough' }
+  stock[key] -= qty
+  return { ok: true, left: stock[key] }
+}</code></pre>
+<pre><code>docker compose exec dev npm run typecheck
+# packages/core/src/playground/01_basics.ts:1:19 - error TS7006: Parameter 'stock' implicitly has an 'any' type.</code></pre>
+<p>Шаг Б — аннотируем параметры. Остальное пусть выведет:</p><pre><code>type Stock = Record&lt;string, number&gt;                                    // словарь «ключ → количество»
+
+function withdraw(stock: Stock, itemId: string, location: string, qty: number) {
+  const key = `${itemId}@${location}`                                  // key: string — выведено
+  const have = stock[key]                                              // number | undefined  ← noUncheckedIndexedAccess
+  if (have === undefined || have &lt; qty) return { ok: false, error: 'not enough' } as const
+  stock[key] = have - qty
+  return { ok: true, left: stock[key] } as const                       // as const: ok — литерал true, а не boolean
+}
+// наведите курсор на withdraw: возвращаемый тип выведен как
+//   { readonly ok: false; readonly error: "not enough" } | { readonly ok: true; readonly left: number | undefined }
+
+const stock: Stock = { 'bolt-m6@A1': 10 }
+const r = withdraw(stock, 'bolt-m6', 'A1', 3)
+if (r.ok) console.log('осталось', r.left)                             // внутри if: r.left доступен
+else console.log('ошибка', r.error)
+
+// эксперименты — раскомментируйте по одному, запустите typecheck, прочитайте ошибку, закомментируйте:
+// withdraw(stock, 'bolt-m6', 'A1', '5')      // TS2345: Argument of type 'string' is not assignable to parameter of type 'number'
+// withdraw(stock, 'bolt-m6', 'A1')           // TS2554: Expected 4 arguments, but got 3
+// r.left                                     // TS2339: Property 'left' does not exist on type '{ ok: false; … }'
+// const s2: Stock = { a: '1' }               // TS2322: Type 'string' is not assignable to type 'number'
+
+// примитивы, массивы, кортежи, объекты — для глаза:
+const units: string[] = ['pcs', 'kg']
+const pair: [string, number] = ['bolt-m6', 3]
+const [sku, count] = pair                                              // sku: string, count: number
+type Item = { id: string; name: string; minStock?: number; readonly sku: string }
+const bolt: Item = { id: '1', name: 'Болт M6', sku: 'bolt-m6' }
+// bolt.sku = 'x'                             // TS2540: read-only
+// bolt.minStock.toFixed()                    // TS18048: possibly 'undefined'
+console.log(bolt.minStock?.toFixed() ?? 'нет минимума')</code></pre>
+<pre><code>docker compose exec dev npm run typecheck                          # OK
+docker compose exec dev npm run play packages/core/src/playground/01_basics.ts    # осталось 7 / нет минимума</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Четыре ошибки из раздела 1 воспроизведены как ошибки компиляции и закомментированы. Заметьте <code>left: number | undefined</code>: после <code>stock[key] = …</code> компилятор всё равно не знает, что ключ теперь есть, — с <code>noUncheckedIndexedAccess</code> любое чтение по ключу словаря честно даёт <code>| undefined</code>. В сессии 2 вы исправите это, вернув <code>have - qty</code> вместо повторного чтения.</p></div>
+<div class="why"><b>Зачем:</b> <b>Аннотируйте входы, выводите остальное.</b> Четыре аннотации параметров — и компилятор вывел ключ, остаток, тип результата (включая размеченное объединение из-за <code>as const</code>). Возвращаемый тип функции можно не писать, но для публичных функций его пишут — как контракт, чтобы случайное изменение внутри не поменяло тип наружу. <b>Читайте ошибки:</b> у каждой есть код TS####, сообщение «что не подходит куда» и место; вы только что прочитали четыре разных.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите <code>as const</code> у обоих <code>return</code>. Каким стал тип <code>r</code>? Почему <code>r.left</code> внутри <code>if (r.ok)</code> перестал работать?</li><li>Замените <code>Record&lt;string, number&gt;</code> на <code>{ [key: string]: number }</code>. Есть разница? А если ключи — <code>'bolt-m6@A1' | 'nut-m6@A1'</code>?</li></ul></div>
+</div></div>
+<div class="step" id="step-1-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-3"></label><span class="num">Шаг 1.3</span>Union, литералы, as const, type/interface, структурность — <span class="file">02_unions.ts</span><a class="anchor" href="#step-1-3">#</a></span><div class="step-body">
+<pre><code>// packages/core/src/playground/02_unions.ts
+
+// ── union и литералы ──────────────────────────────────────────────────────────
+type Unit = 'pcs' | 'kg' | 'l'
+type Qty = number | 'unknown'
+
+function formatQty(q: Qty, unit: Unit): string {
+  if (typeof q === 'number') return `${q} ${unit}`                     // сужение через typeof: q: number
+  return `? ${unit}`                                                   // здесь q: 'unknown'
+}
+
+// ── as const → тип из значения ────────────────────────────────────────────────
+const UNITS = ['pcs', 'kg', 'l'] as const                              // readonly ['pcs', 'kg', 'l']
+type UnitFromConst = (typeof UNITS)[number]                            // 'pcs' | 'kg' | 'l'  — равен Unit
+function isUnit(s: string): s is UnitFromConst {                       // type predicate: рантайм-список + тип из одного места
+  return (UNITS as readonly string[]).includes(s)
+}
+const input: string = process.argv[2] ?? 'kg'
+if (isUnit(input)) console.log(formatQty(3, input))                    // input сужен до Unit
+else console.log(`неизвестная единица: ${input}`)
+
+// ── type vs interface ────────────────────────────────────────────────────────
+interface Entity { readonly id: string }
+interface Item extends Entity { name: string; unit: Unit }
+type ItemWithStock = Item &amp; { stock: number }                          // пересечение
+type MaybeItem = Item | undefined                                      // union — только через type
+
+// ── структурная типизация ────────────────────────────────────────────────────
+const raw = { id: '1', name: 'Болт', unit: 'pcs' as const, color: 'grey' }
+const item: Item = raw                                                 // ✔ лишнее поле color не мешает (переменная)
+// const item2: Item = { id: '1', name: 'Болт', unit: 'pcs', color: 'grey' }   // ✖ TS2353: excess property (литерал)
+
+// ── размеченное объединение (превью сессии 2) ────────────────────────────────
+type Shape = { kind: 'box'; w: number; h: number } | { kind: 'ball'; r: number }
+function area(s: Shape): number {
+  switch (s.kind) {
+    case 'box':  return s.w * s.h                                       // s: box — есть w, h
+    case 'ball': return Math.PI * s.r ** 2
+  }
+  // без default: если добавить вариант в Shape, TS скажет «not all code paths return a value» — тоже защита
+}
+console.log(area({ kind: 'box', w: 2, h: 3 }), area({ kind: 'ball', r: 1 }))
+// area({ kind: 'box', r: 1 })               // ✖ TS2353 / TS2322 — смешать варианты нельзя</code></pre>
+<pre><code>docker compose exec dev npm run typecheck &amp;&amp; docker compose exec dev npm run play packages/core/src/playground/02_unions.ts kg</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>3 kg
+6 3.141592653589793</pre><p>С аргументом <code>box</code> — «неизвестная единица: box». Наведите курсор на <code>UnitFromConst</code> и <code>raw.unit</code>: увидите литералы. Уберите <code>as const</code> у <code>'pcs'</code> в <code>raw</code> — <code>unit</code> станет <code>string</code>, и присваивание в <code>Item</code> сломается.</p></div>
+<div class="why"><b>Зачем:</b> <b>Литеральные типы + <code>as const</code></b> — главный способ описывать «одно из N» без enum: значение остаётся обычным JS-массивом (для <code>includes</code>, для вывода в help), а тип выводится из него. <b>Type predicate</b> связывает рантайм-проверку с сужением. <b>Excess property check</b> работает только для литералов прямо в аннотации — защита от опечаток в ключах при создании объекта, но не помеха структурной совместимости переменных.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>(UNITS as readonly string[]).includes(s)</code> требует приведения? Что говорит ошибка без него и почему это ограничение разумно?</li><li>Напишите <code>type Shape</code> без дискриминанта <code>kind</code> (просто <code>{ w; h } | { r }</code>). Как теперь сузить внутри <code>area</code>? (Подсказка: <code>'r' in s</code>.) Чем хуже?</li></ul></div>
+</div></div>
+<div class="step" id="step-1-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-4"></label><span class="num">Шаг 1.4</span>Функции, колбэки, generics, unknown/any/never, catch — <span class="file">03_functions.ts</span><a class="anchor" href="#step-1-4">#</a></span><div class="step-body">
+<pre><code>// packages/core/src/playground/03_functions.ts
+
+// ── параметры: optional, default, rest ───────────────────────────────────────
+function log(message: string, level: 'info' | 'warn' | 'error' = 'info', ...tags: string[]): void {
+  console.log(`[${level}] ${message}`, tags.length ? tags : '')
+}
+log('старт'); log('мало болтов', 'warn', 'stock', 'A1')
+
+// ── тип функции и колбэки ─────────────────────────────────────────────────────
+type Formatter = (value: number, unit: string) =&gt; string
+const short: Formatter = (v, u) =&gt; `${v}${u}`                          // параметры выведены из типа Formatter
+function each&lt;T&gt;(items: readonly T[], cb: (item: T, index: number) =&gt; void): void { items.forEach(cb) }
+each(['a', 'b'], (s, i) =&gt; console.log(i, s.toUpperCase()))            // s: string — выведено
+
+// ── generic-функция ──────────────────────────────────────────────────────────
+function first&lt;T&gt;(items: readonly T[]): T | undefined { return items[0] }
+const f1 = first([1, 2, 3])                                            // number | undefined
+const f2 = first(['x'])                                                // string | undefined
+function byId&lt;T extends { id: string }&gt;(list: readonly T[], id: string): T | undefined {
+  return list.find(x =&gt; x.id === id)
+}
+// byId([1, 2], '1')                          // ✖ number не имеет id — ограничение T extends { id: string }
+
+// ── unknown vs any ───────────────────────────────────────────────────────────
+function parseUnknown(text: string): unknown { return JSON.parse(text) }   // честно: JSON.parse возвращает any, мы говорим unknown
+const data = parseUnknown('{"items":[{"id":"1"}]}')
+// data.items                                 // ✖ TS18046: 'data' is of type 'unknown'
+if (typeof data === 'object' &amp;&amp; data !== null &amp;&amp; 'items' in data &amp;&amp; Array.isArray(data.items)) {
+  console.log('items:', data.items.length)                             // сужено шаг за шагом
+}
+const loose: any = JSON.parse('{}')
+loose.whatever.deep.chain                                              // ✔ компилируется, ✖ падает в рантайме — вот цена any
+
+// ── never и catch ────────────────────────────────────────────────────────────
+function fail(message: string): never { throw new Error(message) }
+function requireQty(q: number | undefined): number { return q ?? fail('qty обязателен') }   // never «вливается» в number
+
+try { requireQty(undefined) }
+catch (e) {                                                            // e: unknown (useUnknownInCatchVariables входит в strict)
+  if (e instanceof Error) console.log('поймали:', e.message)          // сужение instanceof
+  else console.log('поймали не-Error:', e)
+}</code></pre>
+<pre><code>docker compose exec dev npm run typecheck &amp;&amp; docker compose exec dev npm run play packages/core/src/playground/03_functions.ts</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>[info] старт 
+[warn] мало болтов [ 'stock', 'A1' ]
+0 A
+1 B
+items: 1
+TypeError: Cannot read properties of undefined (reading 'deep')</pre><p>Последняя строка — рантайм-падение на <code>any</code>, которое TS пропустил. Удалите её.</p></div>
+<div class="why"><b>Зачем:</b> <b>Колбэки выводят типы параметров из контекста</b> — поэтому в <code>each</code> и <code>.forEach</code> не нужно писать <code>(s: string)</code>. <b>Generic сохраняет тип</b>: <code>first</code> для чисел возвращает число, для строк — строку; <code>T extends {…}</code> — ограничение, без которого внутри нельзя обратиться к <code>x.id</code>. <b><code>unknown</code> заставляет проверять</b>, <code>any</code> — отключает проверку; <code>catch (e)</code> в strict — <code>unknown</code>, потому что бросить можно что угодно. <b><code>never</code></b> — тип «сюда не дойдём»: функция, которая только бросает, вливается в любой тип в <code>??</code>.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Что выведет курсор на <code>cb</code> внутри <code>each</code>, если убрать аннотацию <code>(item: T, index: number) =&gt; void</code> и оставить <code>cb: Function</code>? Почему <code>Function</code> — почти <code>any</code>?</li><li>Почему <code>JSON.parse</code> возвращает <code>any</code>, а не <code>unknown</code>? (Историческая причина.) Что вы теперь будете делать с его результатом всегда?</li></ul></div>
+</div></div>
+<div class="step" id="step-1-5"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-5"></label><span class="num">Шаг 1.5</span>strict на практике, readonly, первый тест и тест на тип — <span class="file">04_strict.ts</span><a class="anchor" href="#step-1-5">#</a></span><div class="step-body">
+<pre><code>// packages/core/src/playground/04_strict.ts — что именно даёт strict; и первый тест
+
+type Item = { id: string; name: string; minStock?: number }
+const items: Item[] = [{ id: '1', name: 'Болт' }, { id: '2', name: 'Гайка', minStock: 50 }]
+
+// ── noUncheckedIndexedAccess ──────────────────────────────────────────────────
+const firstItem = items[0]                          // Item | undefined — массив может быть пуст
+// firstItem.name                                   // ✖ possibly undefined
+console.log(firstItem?.name)
+const byId: Record&lt;string, Item&gt; = Object.fromEntries(items.map(i =&gt; [i.id, i]))
+console.log(byId['1']?.name, byId['404']?.name)     // второй — undefined, и компилятор это знал
+
+// ── strictNullChecks и ! ─────────────────────────────────────────────────────
+const found = items.find(i =&gt; i.id === '2')
+console.log(found!.minStock)                        // ! — «точно есть»; замените '2' на '9' и запустите: падение
+console.log(found?.minStock ?? 'нет минимума')      // безопасно
+
+// ── readonly и мутации ───────────────────────────────────────────────────────
+const frozen: readonly Item[] = items
+// frozen.push({ id: '3', name: 'x' })             // ✖ Property 'push' does not exist on type 'readonly Item[]'
+const copy = [...frozen, { id: '3', name: 'Шайба' }]  // новый массив — ок
+
+export function lowStock(list: readonly Item[], stock: Record&lt;string, number&gt;): Item[] {
+  return list.filter(i =&gt; i.minStock !== undefined &amp;&amp; (stock[i.id] ?? 0) &lt; i.minStock)
+}</code></pre>
+<pre><code>// packages/core/src/playground/04_strict.test.ts
+import { describe, it, expect, expectTypeOf } from 'vitest'
+import { lowStock } from './04_strict.js'          // .js в импорте — требование NodeNext; tsx/vitest найдут .ts
+
+describe('lowStock', () =&gt; {
+  it('returns items below minStock', () =&gt; {
+    const items = [{ id: '1', name: 'A' }, { id: '2', name: 'B', minStock: 5 }]
+    expect(lowStock(items, { '2': 3 })).toEqual([{ id: '2', name: 'B', minStock: 5 }])
+    expect(lowStock(items, {})).toHaveLength(1)     // нет записи → 0 &lt; 5
+  })
+
+  it('has the right type', () =&gt; {
+    expectTypeOf(lowStock).returns.toEqualTypeOf&lt;{ id: string; name: string; minStock?: number }[]&gt;()   // тест на ТИП: падает при компиляции
+  })
+})</code></pre>
+<pre><code>docker compose exec dev npm run typecheck &amp;&amp; docker compose exec dev npm test</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre> ✓ packages/core/src/playground/04_strict.test.ts (2)
+ Test Files  1 passed (1)
+      Tests  2 passed (2)</pre><p>Теперь в <code>tsconfig.base.json</code> временно поставьте <code>"strict": false</code> и <code>"noUncheckedIndexedAccess": false</code>, раскомментируйте <code>firstItem.name</code> — ошибок нет. Верните обратно. Это и есть разница между «TS с подсказками» и «TS как проверка».</p></div>
+<div class="why"><b>Зачем:</b> <b>strict — не опция, а определение TypeScript.</b> Без <code>strictNullChecks</code> каждый <code>find()</code> — потенциальный <code>TypeError</code>, который компилятор не увидит. <b><code>noUncheckedIndexedAccess</code></b> идёт дальше и признаёт, что массивы бывают пустыми, а словари — без ключа; цена — <code>?.</code> и <code>?? 0</code> там, где вы и так должны были подумать. <b>Тесты на типы</b> (<code>expectTypeOf</code>) — способ зафиксировать публичный контракт: изменится тип результата — упадёт компиляция теста. <b><code>.js</code> в импортах</b> — не опечатка: Node ESM резолвит по расширению итогового файла; tsx и vitest это понимают.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>Object.fromEntries(items.map(i =&gt; [i.id, i]))</code> без аннотации <code>Record&lt;string, Item&gt;</code> даёт <code>{ [k: string]: Item }</code>, а <code>Object.keys(byId)</code> — <code>string[]</code>, а не <code>keyof typeof byId</code>? Погуглите «Object.keys keyof typescript» — это классический вопрос.</li><li>Где в вашем коде <code>!</code> оправдан? Придумайте один честный случай.</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 1 → ПЕРЕД СЕССИЕЙ 2</span><ul>
+<li>✅ <code>git add -A && git commit -m "session 1: playground"</code></li>
+<li>📝 Ответы 1.2–1.5 в <span class="file">docs/ts-notes.md</span>.</li>
+<li>📖 Перечитать раздел 3 — сессия 2 целиком про него.</li>
+</ul></div>
+<div class="session-banner" id="session-2">Сессия <a href="#session-2" style="color:#fff;text-decoration:none">2</a> — Домен склада: branded IDs, размеченное объединение, Result, сужение <span>~3 часа</span></div>
+<div class="step" id="step-2-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-1"></label><span class="num">Шаг 2.1</span>Branded IDs, Item, Location, Result&lt;T, E&gt;<a class="anchor" href="#step-2-1">#</a></span><div class="step-body">
+<p>Проблема из раздела 3: <code>ItemId</code> и <code>LocationId</code> — обе строки, перепутать можно. Делаем их <b>разными</b> типами, оставаясь строками в рантайме.</p><pre><code>// packages/core/src/domain/ids.ts
+declare const brand: unique symbol                                     // существует только для типов: declare — реализации нет
+
+/** Номинальный тип поверх примитива: string, к которому «приклеена» метка. */
+export type Brand&lt;T, Name extends string&gt; = T &amp; { readonly [brand]: Name }
+
+export type ItemId     = Brand&lt;string, 'ItemId'&gt;
+export type LocationId = Brand&lt;string, 'LocationId'&gt;
+export type MovementId = Brand&lt;string, 'MovementId'&gt;
+
+// единственный способ получить branded-значение — через конструктор с проверкой
+export const itemId     = (s: string): ItemId     =&gt; assertNonEmpty(s, 'ItemId') as ItemId
+export const locationId = (s: string): LocationId =&gt; assertNonEmpty(s, 'LocationId') as LocationId
+export const movementId = (s: string): MovementId =&gt; assertNonEmpty(s, 'MovementId') as MovementId
+
+function assertNonEmpty(s: string, kind: string): string {
+  if (s.trim() === '') throw new TypeError(`${kind} не может быть пустым`)
+  return s.trim()
+}</code></pre>
+<pre><code>// packages/core/src/domain/item.ts
+import type { ItemId } from './ids.js'
+
+export const UNITS = ['pcs', 'kg', 'l'] as const
+export type Unit = (typeof UNITS)[number]
+
+export interface Item {
+  readonly id: ItemId
+  readonly sku: string
+  name: string
+  unit: Unit
+  minStock?: number
+}
+
+// packages/core/src/domain/location.ts
+import type { LocationId } from './ids.js'
+export interface Location { readonly id: LocationId; name: string }</code></pre>
+<pre><code>// packages/core/src/lib/result.ts — успех или ошибка, никогда оба; замена исключениям для ОЖИДАЕМЫХ отказов
+export type Result&lt;T, E&gt; = { readonly ok: true; readonly value: T } | { readonly ok: false; readonly error: E }
+
+export const ok  = &lt;T&gt;(value: T): Result&lt;T, never&gt; =&gt; ({ ok: true, value })
+export const err = &lt;E&gt;(error: E): Result&lt;never, E&gt; =&gt; ({ ok: false, error })
+
+export function isOk&lt;T, E&gt;(r: Result&lt;T, E&gt;): r is { ok: true; value: T } { return r.ok }
+
+/** Развернуть или бросить — для мест, где отказ действительно неожиданен (тесты, скрипты). */
+export function unwrap&lt;T, E&gt;(r: Result&lt;T, E&gt;): T {
+  if (r.ok) return r.value
+  throw new Error(`unwrap на ошибке: ${JSON.stringify(r.error)}`)
+}</code></pre>
+<pre><code>// packages/core/src/playground/05_ids.ts — проверка
+import { itemId, locationId, type ItemId, type LocationId } from '../domain/ids.js'
+
+function move(item: ItemId, loc: LocationId) { console.log(`${item} → ${loc}`) }
+const bolt = itemId('bolt-m6'), a1 = locationId('A1')
+move(bolt, a1)                           // ✔
+// move(a1, bolt)                        // ✖ TS2345: Argument of type 'LocationId' is not assignable to parameter of type 'ItemId'
+// move('bolt-m6', 'A1')                 // ✖ обычная строка — тоже нельзя: только через конструктор
+console.log(typeof bolt, bolt.toUpperCase())   // string BOLT-M6 — в рантайме это просто строка</code></pre>
+<pre><code>docker compose exec dev npm run typecheck &amp;&amp; docker compose exec dev npm run play packages/core/src/playground/05_ids.ts</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>bolt-m6 → A1
+string BOLT-M6</pre><p>Раскомментированные строки дают ошибки компиляции, хотя в рантайме всё — строки.</p></div>
+<div class="why"><b>Зачем:</b> <b>Branded (номинальные) типы</b> — способ обойти структурную типизацию там, где она мешает: два <code>string</code> становятся несовместимыми, потому что к типу «приклеено» уникальное свойство, которого в рантайме нет (<code>declare const</code>, <code>unique symbol</code>). Конструктор <code>itemId()</code> — единственная дверь: все проверки формата ID в одном месте, как <code>Money::fromCents</code> в ООП-лабе. <b><code>Result</code></b> — размеченное объединение для «может не получиться»: вызывающий <i>обязан</i> проверить <code>ok</code>, прежде чем взять <code>value</code>, — компилятор не даст иначе. Исключения остаются для неожиданного (баг, отвал диска).</div>
+<details class="deep"><summary>🔬 Под капотом: unique symbol и почему brand не сериализуется</summary><div class="deep-body">
+
+<p><code>declare const brand: unique symbol</code> — объявление без реализации: файл не создаёт символ в рантайме, но тип <code>{ [brand]: Name }</code> существует для компилятора. <code>JSON.stringify(bolt)</code> даёт <code>"bolt-m6"</code> — метки нет. Обратная сторона: из JSON вы получите <code>string</code>, и снова нужен <code>itemId()</code> — это правильно: граница (раздел 5) обязана переподтвердить типы. Альтернатива без символа — <code>string &amp; { __brand: 'ItemId' }</code>; работает так же, символ лишь защищает от случайного совпадения имени.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Можно ли сделать <code>Brand&lt;number, 'Qty'&gt;</code> для количества и запретить складывать <code>Qty</code> с <code>number</code>? Что при этом сломается в арифметике?</li><li>Почему <code>ok</code> возвращает <code>Result&lt;T, never&gt;</code>, а не <code>Result&lt;T, E&gt;</code>? Что даёт <code>never</code> при объединении с другими Result?</li></ul></div>
+</div></div>
+<div class="step" id="step-2-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-2"></label><span class="num">Шаг 2.2</span>Movement как размеченное объединение, exhaustive switch, MovementOf&lt;K&gt;<a class="anchor" href="#step-2-2">#</a></span><div class="step-body">
+<pre><code>// packages/core/src/domain/movement.ts
+import type { ItemId, LocationId, MovementId } from './ids.js'
+
+interface MovementBase {
+  readonly id: MovementId
+  readonly at: string                 // ISO-дата
+  readonly itemId: ItemId
+  readonly qty: number
+  readonly note?: string
+}
+
+export type MovementIn       = MovementBase &amp; { readonly kind: 'in';       readonly to: LocationId; readonly unitCost: number }
+export type MovementOut      = MovementBase &amp; { readonly kind: 'out';      readonly from: LocationId; readonly reason: OutReason }
+export type MovementTransfer = MovementBase &amp; { readonly kind: 'transfer'; readonly from: LocationId; readonly to: LocationId }
+export type MovementAdjust   = MovementBase &amp; { readonly kind: 'adjust';   readonly location: LocationId; readonly reason: string }   // qty может быть отрицательным
+
+export type Movement = MovementIn | MovementOut | MovementTransfer | MovementAdjust
+
+export const OUT_REASONS = ['sale', 'writeoff', 'sample'] as const
+export type OutReason = (typeof OUT_REASONS)[number]
+
+export type MovementKind = Movement['kind']                                   // 'in' | 'out' | 'transfer' | 'adjust'
+export type MovementOf&lt;K extends MovementKind&gt; = Extract&lt;Movement, { kind: K }&gt;   // MovementOf&lt;'in'&gt; = MovementIn
+
+export function describe(m: Movement): string {
+  switch (m.kind) {
+    case 'in':       return `+${m.qty} ${m.itemId} → ${m.to} (по ${m.unitCost})`
+    case 'out':      return `−${m.qty} ${m.itemId} из ${m.from} (${m.reason})`
+    case 'transfer': return `${m.qty} ${m.itemId}: ${m.from} → ${m.to}`
+    case 'adjust':   return `${m.qty &gt; 0 ? '+' : ''}${m.qty} ${m.itemId} в ${m.location}: ${m.reason}`
+    default:         return assertNever(m)
+  }
+}
+
+export function assertNever(x: never): never {
+  throw new Error(`Необработанный вариант: ${JSON.stringify(x)}`)
+}
+
+/** Куда движение прибавляет и откуда убавляет — «нормализация» четырёх вариантов в общий вид. */
+export function deltas(m: Movement): ReadonlyArray&lt;{ location: LocationId; delta: number }&gt; {
+  switch (m.kind) {
+    case 'in':       return [{ location: m.to, delta: m.qty }]
+    case 'out':      return [{ location: m.from, delta: -m.qty }]
+    case 'transfer': return [{ location: m.from, delta: -m.qty }, { location: m.to, delta: m.qty }]
+    case 'adjust':   return [{ location: m.location, delta: m.qty }]
+    default:         return assertNever(m)
+  }
+}</code></pre>
+<pre><code>// packages/core/src/domain/movement.test.ts
+import { describe as suite, it, expect, expectTypeOf } from 'vitest'
+import { itemId, locationId, movementId } from './ids.js'
+import { deltas, describe, type Movement, type MovementOf } from './movement.js'
+
+const base = { id: movementId('m1'), at: '2026-09-14T10:00:00Z', itemId: itemId('bolt-m6'), qty: 5 }
+
+suite('Movement', () =&gt; {
+  it('transfer produces two deltas', () =&gt; {
+    const m: Movement = { ...base, kind: 'transfer', from: locationId('A1'), to: locationId('B2') }
+    expect(deltas(m)).toEqual([{ location: 'A1', delta: -5 }, { location: 'B2', delta: 5 }])
+    expect(describe(m)).toBe('5 bolt-m6: A1 → B2')
+  })
+
+  it('types: MovementOf narrows the union', () =&gt; {
+    expectTypeOf&lt;MovementOf&lt;'in'&gt;&gt;().toHaveProperty('unitCost')
+    expectTypeOf&lt;MovementOf&lt;'in'&gt;&gt;().not.toHaveProperty('from')
+    // @ts-expect-error — у прихода нет from; если ошибка исчезнет, упадёт компиляция теста
+    const bad: MovementOf&lt;'in'&gt; = { ...base, kind: 'in', to: locationId('A1'), unitCost: 1, from: locationId('B') }
+  })
+})</code></pre>
+<p>Эксперимент: добавьте пятый вариант <code>MovementReturn</code> (возврат от клиента: <code>kind: 'return'</code>, <code>to</code>, <code>reason</code>) в union — и запустите <code>typecheck</code>, ничего больше не меняя.</p><div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>src/domain/movement.ts:29:29 - error TS2345: Argument of type 'MovementReturn' is not assignable to parameter of type 'never'.
+src/domain/movement.ts:43:29 - error TS2345: …</pre><p>Компилятор нашёл оба <code>switch</code>, где новый вариант не обработан. Добавьте ветки — ошибки уйдут. Уберите вариант обратно (или оставьте и обработайте — на ваш выбор, дальше в лабе он не нужен). Тесты: 2 passed; <code>@ts-expect-error</code> без ошибки под ним — сам ошибка.</p></div>
+<div class="why"><b>Зачем:</b> <b>Невозможные состояния невыразимы.</b> У прихода нет <code>from</code>, у расхода — <code>to</code>, у корректировки — своё поле; компилятор не даст создать «приход с from». <b><code>assertNever</code> в <code>default</code></b> превращает «забыли обработать» в ошибку компиляции с точным адресом — это самая ценная строчка в TS-проекте. <b><code>MovementOf&lt;K&gt;</code></b> через <code>Extract</code> — первый conditional type, который вы применили: «из union возьми вариант с таким kind». <b><code>deltas()</code></b> — нормализация: четыре варианта превращаются в общий вид один раз, и дальше (<code>applyMovement</code>) о вариантах думать не нужно.</div>
+<details class="deep"><summary>🔬 Под капотом: readonly на полях: защита от мутаций, не иммутабельность</summary><div class="deep-body">
+
+<p><code>readonly qty</code> запрещает <code>m.qty = 3</code> — но не запрещает мутировать объект через другую ссылку без <code>readonly</code> (структурная совместимость: <code>Movement</code> присваивается в тип без readonly). Полная иммутабельность — <code>Object.freeze</code> в рантайме или дисциплина «никто не держит mutable-ссылку». В домене мы просто не мутируем: <code>applyMovement</code> возвращает новый Stock.</p>
+<p><code>@ts-expect-error</code> vs <code>@ts-ignore</code>: первый <i>требует</i> ошибку на следующей строке и сам становится ошибкой, если её нет, — так фиксируют «это должно быть запрещено». Второй молча глотает — не используйте.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li><code>MovementBase</code> — <code>interface</code>, варианты — <code>type</code> через <code>&amp;</code>. Перепишите вариант <code>MovementIn</code> как <code>interface MovementIn extends MovementBase { kind: 'in'; … }</code>. Работает? Какой стиль читается лучше?</li><li>Почему <code>describe</code> объявлен с возвращаемым типом <code>string</code>, хотя мог бы выводиться? Уберите — что изменится при добавлении варианта без ветки в <code>switch</code> без <code>default</code>?</li></ul></div>
+</div></div>
+<div class="step" id="step-2-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-3"></label><span class="num">Шаг 2.3</span>applyMovement: Result&lt;Stock, StockError&gt;, иммутабельный снимок, exhaustive explain<a class="anchor" href="#step-2-3">#</a></span><div class="step-body">
+<pre><code>// packages/core/src/domain/stock.ts
+import type { ItemId, LocationId } from './ids.js'
+import { deltas, type Movement } from './movement.js'
+import { err, ok, type Result } from '../lib/result.js'
+
+/** Ключ остатка: товар@склад. Тип-шаблон: строка определённой формы. */
+export type StockKey = `${string}@${string}`
+export const stockKey = (item: ItemId, location: LocationId): StockKey =&gt; `${item}@${location}`
+
+export type Stock = Readonly&lt;Record&lt;StockKey, number&gt;&gt;              // иммутабельный снимок: apply возвращает новый
+
+export type StockError =
+  | { code: 'NON_POSITIVE_QTY';  qty: number }
+  | { code: 'SAME_LOCATION';     location: LocationId }
+  | { code: 'INSUFFICIENT';      itemId: ItemId; location: LocationId; have: number; need: number }
+
+export function applyMovement(stock: Stock, m: Movement): Result&lt;Stock, StockError&gt; {
+  if (m.kind !== 'adjust' &amp;&amp; m.qty &lt;= 0)                      return err({ code: 'NON_POSITIVE_QTY', qty: m.qty })
+  if (m.kind === 'transfer' &amp;&amp; m.from === m.to)               return err({ code: 'SAME_LOCATION', location: m.from })
+
+  const next: Record&lt;StockKey, number&gt; = { ...stock }          // копия; здесь мутируем только её
+  for (const { location, delta } of deltas(m)) {
+    const key  = stockKey(m.itemId, location)
+    const have = next[key] ?? 0                                 // noUncheckedIndexedAccess: number | undefined → number
+    const after = have + delta
+    if (after &lt; 0) return err({ code: 'INSUFFICIENT', itemId: m.itemId, location, have, need: -delta })
+    next[key] = after
+  }
+  return ok(next)
+}
+
+export function quantity(stock: Stock, item: ItemId, location: LocationId): number {
+  return stock[stockKey(item, location)] ?? 0
+}
+
+/** Человекочитаемое описание ошибки — exhaustive по code. */
+export function explain(e: StockError): string {
+  switch (e.code) {
+    case 'NON_POSITIVE_QTY': return `количество должно быть больше нуля, получено ${e.qty}`
+    case 'SAME_LOCATION':    return `перемещение внутри одного склада ${e.location} бессмысленно`
+    case 'INSUFFICIENT':     return `на складе ${e.location} только ${e.have} ${e.itemId}, нужно ${e.need}`
+  }
+}</code></pre>
+<pre><code>// packages/core/src/domain/stock.test.ts
+import { describe, it, expect } from 'vitest'
+import { itemId, locationId, movementId } from './ids.js'
+import { applyMovement, quantity, type Stock } from './stock.js'
+import { unwrap } from '../lib/result.js'
+
+const bolt = itemId('bolt-m6'), a1 = locationId('A1'), b2 = locationId('B2')
+const mv = (id: string) =&gt; ({ id: movementId(id), at: '2026-09-14T10:00:00Z', itemId: bolt })
+
+describe('applyMovement', () =&gt; {
+  it('in then out', () =&gt; {
+    let stock: Stock = {}
+    stock = unwrap(applyMovement(stock, { ...mv('1'), kind: 'in', to: a1, qty: 10, unitCost: 2 }))
+    stock = unwrap(applyMovement(stock, { ...mv('2'), kind: 'out', from: a1, qty: 3, reason: 'sale' }))
+    expect(quantity(stock, bolt, a1)).toBe(7)
+  })
+
+  it('does not mutate the input stock', () =&gt; {
+    const before: Stock = { 'bolt-m6@A1': 10 }
+    const r = applyMovement(before, { ...mv('1'), kind: 'out', from: a1, qty: 3, reason: 'sale' })
+    expect(before['bolt-m6@A1']).toBe(10)
+    expect(r.ok &amp;&amp; r.value['bolt-m6@A1']).toBe(7)
+  })
+
+  it('insufficient stock is a typed error, not an exception', () =&gt; {
+    const r = applyMovement({}, { ...mv('1'), kind: 'transfer', from: a1, to: b2, qty: 5 })
+    expect(r.ok).toBe(false)
+    if (!r.ok) {                                                     // сужение: внутри r.error доступен
+      expect(r.error.code).toBe('INSUFFICIENT')
+      if (r.error.code === 'INSUFFICIENT') expect(r.error.need).toBe(5)   // и ещё раз — до полей конкретной ошибки
+    }
+  })
+
+  it('transfer to the same location is rejected before touching stock', () =&gt; {
+    const r = applyMovement({}, { ...mv('1'), kind: 'transfer', from: a1, to: a1, qty: 1 })
+    expect(!r.ok &amp;&amp; r.error.code).toBe('SAME_LOCATION')
+  })
+})</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>4 passed. Наведите курсор на <code>r.error</code> внутри <code>if (r.error.code === 'INSUFFICIENT')</code> — <code>{ code: 'INSUFFICIENT'; itemId; location; have; need }</code>: сужение сработало дважды подряд (Result → ошибка → конкретная ошибка).</p></div>
+<div class="why"><b>Зачем:</b> <b>Ошибки как данные.</b> <code>StockError</code> — тоже размеченное объединение: у каждой ошибки свои поля, и <code>explain()</code> обязан обработать все (нет <code>default</code> — при новом коде компилятор скажет «not all code paths return»). Вызывающий код (CLI, API) сможет по <code>code</code> выбрать exit-код или HTTP-статус без парсинга строк. <b>Иммутабельный <code>Stock</code></b>: <code>Readonly&lt;Record&gt;</code> снаружи, локальная mutable-копия внутри — компилятор не даст <code>stock[key] = …</code> на входном параметре. <b>Template literal type <code>StockKey</code></b>: ключ — не любая строка, а строка вида <code>a@b</code>; <code>stock['oops']</code> — ошибка компиляции.</div>
+<details class="deep"><summary>🔬 Под капотом: почему не исключения: Result vs throw</summary><div class="deep-body">
+
+<p>Исключение не видно в сигнатуре: <code>applyMovement(): Stock</code> ничего не говорит о том, что может упасть, и вызывающий узнает об этом в проде. <code>Result&lt;Stock, StockError&gt;</code> — часть типа, и компилятор заставит проверить. Правило лабы: <b>ожидаемые отказы бизнес-логики — Result; неожиданное (баг, I/O) — throw</b>. Цена Result — многословность (<code>if (!r.ok) return r</code> на каждом шаге); в сессии 3 можно написать <code>map/flatMap</code> для цепочек — упражнение.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Что произойдёт при <code>adjust</code> с отрицательным <code>qty</code>, превышающим остаток? Какая ветка сработает и правильно ли сообщение <code>need</code>?</li><li>Замените <code>Stock</code> на <code>Map&lt;StockKey, number&gt;</code>. Что станет проще, что сложнее (сериализация в JSON, <code>Readonly</code>, спред)?</li></ul></div>
+</div></div>
+<div class="step" id="step-2-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-4"></label><span class="num">Шаг 2.4</span>Ручные type guards и assertion functions; index.ts пакета<a class="anchor" href="#step-2-4">#</a></span><div class="step-body">
+<p>Данные придут извне (CSV, JSON). До Zod (сессия 4) напишем проверку руками — чтобы понять, <i>что</i> Zod делает за вас, и почему ручной вариант не масштабируется.</p><pre><code>// packages/core/src/domain/guards.ts
+import { itemId, locationId, movementId } from './ids.js'
+import { OUT_REASONS, type Movement, type OutReason } from './movement.js'
+
+const isRecord = (x: unknown): x is Record&lt;string, unknown&gt; =&gt; typeof x === 'object' &amp;&amp; x !== null
+const isString = (x: unknown): x is string =&gt; typeof x === 'string'
+const isNumber = (x: unknown): x is number =&gt; typeof x === 'number' &amp;&amp; Number.isFinite(x)
+const isOutReason = (x: unknown): x is OutReason =&gt; isString(x) &amp;&amp; (OUT_REASONS as readonly string[]).includes(x)
+
+/** Ручной парсер: unknown → Movement | null. Каждое поле — своя проверка. */
+export function parseMovement(x: unknown): Movement | null {
+  if (!isRecord(x) || !isString(x.id) || !isString(x.at) || !isString(x.itemId) || !isNumber(x.qty)) return null
+  const base = { id: movementId(x.id), at: x.at, itemId: itemId(x.itemId), qty: x.qty, ...(isString(x.note) ? { note: x.note } : {}) }
+  switch (x.kind) {
+    case 'in':       return isString(x.to) &amp;&amp; isNumber(x.unitCost) ? { ...base, kind: 'in', to: locationId(x.to), unitCost: x.unitCost } : null
+    case 'out':      return isString(x.from) &amp;&amp; isOutReason(x.reason) ? { ...base, kind: 'out', from: locationId(x.from), reason: x.reason } : null
+    case 'transfer': return isString(x.from) &amp;&amp; isString(x.to) ? { ...base, kind: 'transfer', from: locationId(x.from), to: locationId(x.to) } : null
+    case 'adjust':   return isString(x.location) &amp;&amp; isString(x.reason) ? { ...base, kind: 'adjust', location: locationId(x.location), reason: x.reason } : null
+    default:         return null
+  }
+}
+
+/** Assertion function: после вызова x во внешнем коде считается Movement. */
+export function assertMovement(x: unknown): asserts x is Movement {
+  if (parseMovement(x) === null) throw new TypeError(`Не похоже на движение: ${JSON.stringify(x)}`)
+}</code></pre>
+<pre><code>// packages/core/src/domain/guards.test.ts
+import { describe, it, expect } from 'vitest'
+import { parseMovement, assertMovement } from './guards.js'
+
+describe('parseMovement', () =&gt; {
+  const raw: unknown = JSON.parse('{"id":"m1","at":"2026-09-14","itemId":"bolt-m6","qty":5,"kind":"in","to":"A1","unitCost":2}')
+
+  it('accepts a valid record', () =&gt; {
+    const m = parseMovement(raw)
+    expect(m?.kind).toBe('in')
+    if (m?.kind === 'in') expect(m.unitCost).toBe(2)                // сужение по kind
+  })
+
+  it('rejects wrong shape', () =&gt; {
+    expect(parseMovement({ ...(raw as object), qty: '5' })).toBeNull()
+    expect(parseMovement({ ...(raw as object), kind: 'refund' })).toBeNull()
+    expect(() =&gt; assertMovement(42)).toThrow(TypeError)
+  })
+
+  it('assertion narrows', () =&gt; {
+    assertMovement(raw)
+    expect(raw.itemId).toBe('bolt-m6')                               // после assert raw: Movement — .itemId доступен без каста
+  })
+})</code></pre>
+<pre><code>// packages/core/src/index.ts — публичная поверхность пакета
+export * from './domain/ids.js'
+export * from './domain/item.js'
+export * from './domain/location.js'
+export * from './domain/movement.js'
+export * from './domain/stock.js'
+export * from './domain/guards.js'
+export * from './lib/result.js'</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>7 passed всего. В тесте <code>assertion narrows</code> наведите курсор на <code>raw</code> до и после <code>assertMovement(raw)</code>: <code>unknown</code> → <code>Movement</code>.</p></div>
+<div class="why"><b>Зачем:</b> <b>Граница обязана проверять кодом.</b> <code>parseMovement</code> — 15 строк на 4 варианта и 10 полей, и он уже неполный (не проверяет формат даты, положительность qty). Zod в сессии 4 сделает это декларативно и выведет тип из схемы; но идея та же: <code>unknown</code> на входе, доверенный тип на выходе, и ни одного <code>as Movement</code>. <b>Мини-guards</b> (<code>isString</code>, <code>isRecord</code>) — переиспользуемые кирпичики сужения. <b><code>index.ts</code></b> — единственный вход в пакет: остальные модули потребителям невидимы (инкапсуляция на уровне пакета).</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Найдите две проверки, которых не хватает в <code>parseMovement</code>, чтобы гарантировать инварианты <code>applyMovement</code>. Стоит ли их делать здесь или в <code>applyMovement</code>?</li><li>Замените <code>(raw as object)</code> в тестах на что-то без <code>as</code>. Почему потребовался каст?</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 2 → ПЕРЕД СЕССИЕЙ 3</span><ul>
+<li>✅ <code>git commit -am "session 2: domain"</code></li>
+<li>📝 Ответы 2.1–2.4.</li>
+<li>📖 Перечитать раздел 4 — сессия 3 целиком про generics и утилиты.</li>
+</ul></div>
+<div class="session-banner" id="session-3">Сессия <a href="#session-3" style="color:#fff;text-decoration:none">3</a> — Generics и типизированные абстракции: Repository, TypedEmitter, утилиты, satisfies <span>~3 часа</span></div>
+<div class="step" id="step-3-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-1"></label><span class="num">Шаг 3.1</span>Repository&lt;T extends Entity&gt;: интерфейс, InMemory, JsonFile с guard<a class="anchor" href="#step-3-1">#</a></span><div class="step-body">
+<pre><code>// packages/core/src/lib/repository.ts
+export interface Entity { readonly id: string }
+
+/** Хранилище сущностей с id. T — что храним; T['id'] — тип ключа (для branded id — он же). */
+export interface Repository&lt;T extends Entity&gt; {
+  get(id: T['id']): T | undefined
+  save(entity: T): void
+  remove(id: T['id']): boolean
+  list(where?: Partial&lt;T&gt;): readonly T[]
+}
+
+export class InMemoryRepository&lt;T extends Entity&gt; implements Repository&lt;T&gt; {
+  protected readonly items = new Map&lt;T['id'], T&gt;()
+
+  constructor(seed: readonly T[] = []) { for (const e of seed) this.items.set(e.id, e) }
+
+  get(id: T['id']): T | undefined { return this.items.get(id) }
+  save(entity: T): void { this.items.set(entity.id, entity); this.persist() }
+  remove(id: T['id']): boolean { const had = this.items.delete(id); if (had) this.persist(); return had }
+
+  list(where: Partial&lt;T&gt; = {}): readonly T[] {
+    const keys = Object.keys(where) as (keyof T)[]                 // Object.keys → string[]; сужаем сами (см. 1.5)
+    return [...this.items.values()].filter(e =&gt; keys.every(k =&gt; e[k] === where[k]))
+  }
+
+  protected persist(): void {}                                      // хук для наследников
+}</code></pre>
+<pre><code>// packages/core/src/lib/json-repository.ts
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { InMemoryRepository, type Entity } from './repository.js'
+
+/** Файл — граница: содержимое unknown, каждую запись подтверждает guard. */
+export class JsonFileRepository&lt;T extends Entity&gt; extends InMemoryRepository&lt;T&gt; {
+  constructor(private readonly path: string, private readonly guard: (x: unknown) =&gt; x is T) {
+    super(JsonFileRepository.load(path, guard))                     // seed родителю — из файла
+  }
+
+  private static load&lt;T&gt;(path: string, guard: (x: unknown) =&gt; x is T): T[] {
+    if (!existsSync(path)) return []
+    const raw: unknown = JSON.parse(readFileSync(path, 'utf8'))
+    if (!Array.isArray(raw)) throw new TypeError(`${path}: ожидался массив`)
+    return raw.filter(guard)                                        // filter с type predicate сужает элементы до T
+  }
+
+  protected override persist(): void {                              // override — ошибка, если в родителе метода нет
+    writeFileSync(this.path, JSON.stringify([...this.items.values()], null, 2))
+  }
+}</code></pre>
+<pre><code>// packages/core/src/lib/repository.test.ts
+import { describe, it, expect, expectTypeOf } from 'vitest'
+import { mkdtempSync } from 'node:fs'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
+import { InMemoryRepository } from './repository.js'
+import { JsonFileRepository } from './json-repository.js'
+import { itemId, type Item } from '../index.js'
+
+const bolt: Item = { id: itemId('bolt-m6'), sku: 'B6', name: 'Болт M6', unit: 'pcs', minStock: 50 }
+const nut:  Item = { id: itemId('nut-m6'),  sku: 'N6', name: 'Гайка M6', unit: 'pcs' }
+
+describe('Repository&lt;Item&gt;', () =&gt; {
+  it('list with partial filter', () =&gt; {
+    const repo = new InMemoryRepository&lt;Item&gt;([bolt, nut])
+    expect(repo.list({ unit: 'pcs' })).toHaveLength(2)
+    expect(repo.list({ minStock: 50 })).toEqual([bolt])
+    expectTypeOf(repo.get).parameter(0).toEqualTypeOf&lt;Item['id']&gt;()          // ключ — ItemId, не string
+    // @ts-expect-error — фильтр по несуществующему полю
+    repo.list({ color: 'red' })
+  })
+
+  it('JsonFileRepository persists and reloads via guard', () =&gt; {
+    const path = join(mkdtempSync(join(tmpdir(), 'wh-')), 'items.json')
+    const isItem = (x: unknown): x is Item =&gt; typeof x === 'object' &amp;&amp; x !== null &amp;&amp; 'sku' in x
+    new JsonFileRepository&lt;Item&gt;(path, isItem).save(bolt)
+    expect(new JsonFileRepository&lt;Item&gt;(path, isItem).get(itemId('bolt-m6'))?.name).toBe('Болт M6')
+  })
+})</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>9 passed. <code>repo.get('bolt-m6')</code> с обычной строкой — ошибка компиляции: ключ типизирован как <code>ItemId</code> через <code>T['id']</code>.</p></div>
+<div class="why"><b>Зачем:</b> <b>Generic-класс с ограничением</b>: <code>T extends Entity</code> — внутри доступен <code>e.id</code>, а тип ключа <code>T['id']</code> подстраивается под сущность (indexed access). <b><code>Partial&lt;T&gt;</code> как фильтр</b> — первый утилитный тип в деле: любое подмножество полей, ничего лишнего (<code>@ts-expect-error</code> это фиксирует). <b>Хук <code>persist()</code> + <code>override</code></b> — Template Method из ООП-лабы; <code>override</code> (TS 4.3) защищает от опечатки в имени переопределяемого метода. <b><code>filter(guard)</code></b> — перегрузка <code>Array.filter</code> с type predicate возвращает <code>T[]</code>: граница файла закрыта без единого <code>as</code>.</div>
+<details class="deep"><summary>🔬 Под капотом: Object.keys и (keyof T)[] — почему нужен каст, и почему он безопасен здесь</summary><div class="deep-body">
+
+<p><code>Object.keys(where)</code> возвращает <code>string[]</code>, потому что в рантайме у объекта могут быть ключи, которых нет в типе (структурная типизация!). Мы приводим к <code>(keyof T)[]</code>, зная, что <code>where</code> пришёл как <code>Partial&lt;T&gt;</code> и лишних ключей у литерала быть не может (excess property check). Это тот случай, когда каст — осознанное «я знаю больше компилятора», и его стоит сопровождать комментарием. Альтернатива без каста: <code>Object.entries(where).every(([k, v]) =&gt; e[k as keyof T] === v)</code> — каст всё равно нужен; такова цена честной модели <code>Object.keys</code>.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li><code>list()</code> возвращает <code>readonly T[]</code>. Что произойдёт, если вызывающий сделает <code>.push()</code>? А <code>.sort()</code> (мутирует!)? Как безопасно отсортировать?</li><li>Сделайте <code>Repository</code> асинхронным (<code>Promise&lt;T | undefined&gt;</code>). Что изменится в <code>InMemoryRepository</code> и в тестах? Стоило ли делать так с самого начала?</li></ul></div>
+</div></div>
+<div class="step" id="step-3-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-2"></label><span class="num">Шаг 3.2</span>TypedEmitter&lt;Events&gt;: mapped types и generic-методы<a class="anchor" href="#step-3-2">#</a></span><div class="step-body">
+<pre><code>// packages/core/src/lib/typed-emitter.ts
+
+/** Карта событий: имя → кортеж аргументов. Задаётся потребителем. */
+export type EventMap = Record&lt;string, readonly unknown[]&gt;
+type Listener&lt;Args extends readonly unknown[]&gt; = (...args: Args) =&gt; void
+
+export class TypedEmitter&lt;Events extends EventMap&gt; {
+  private readonly listeners: { [K in keyof Events]?: Listener&lt;Events[K]&gt;[] } = {}   // mapped type: те же ключи, значения — массивы слушателей
+
+  on&lt;K extends keyof Events&gt;(event: K, listener: Listener&lt;Events[K]&gt;): () =&gt; void {
+    ;(this.listeners[event] ??= []).push(listener)
+    return () =&gt; this.off(event, listener)                                          // отписка — как в Vue-лабе
+  }
+
+  off&lt;K extends keyof Events&gt;(event: K, listener: Listener&lt;Events[K]&gt;): void {
+    this.listeners[event] = this.listeners[event]?.filter(l =&gt; l !== listener)
+  }
+
+  emit&lt;K extends keyof Events&gt;(event: K, ...args: Events[K]): void {                // ...args типизирован кортежем события
+    this.listeners[event]?.forEach(l =&gt; l(...args))
+  }
+}</code></pre>
+<pre><code>// packages/core/src/lib/typed-emitter.test.ts
+import { describe, it, expect, vi, expectTypeOf } from 'vitest'
+import { TypedEmitter } from './typed-emitter.js'
+import type { Item, Movement } from '../index.js'
+
+type WarehouseEvents = {
+  'movement.applied': [movement: Movement]
+  'stock.low':        [item: Item, quantity: number]
+}
+
+describe('TypedEmitter', () =&gt; {
+  it('routes args by event name', () =&gt; {
+    const bus = new TypedEmitter&lt;WarehouseEvents&gt;()
+    const onLow = vi.fn()
+    const off = bus.on('stock.low', onLow)
+    bus.emit('stock.low', { id: 'x' } as Item, 3)
+    expect(onLow).toHaveBeenCalledWith({ id: 'x' }, 3)
+    off(); bus.emit('stock.low', { id: 'x' } as Item, 1)
+    expect(onLow).toHaveBeenCalledTimes(1)
+  })
+
+  it('types: wrong args are rejected at compile time', () =&gt; {
+    const bus = new TypedEmitter&lt;WarehouseEvents&gt;()
+    // @ts-expect-error — quantity обязателен
+    bus.emit('stock.low', { id: 'x' } as Item)
+    // @ts-expect-error — такого события нет
+    bus.on('stock.hgih', () =&gt; {})
+    bus.on('stock.low', (item, qty) =&gt; { expectTypeOf(item).toEqualTypeOf&lt;Item&gt;(); expectTypeOf(qty).toBeNumber() })
+  })
+})</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>11 passed. В IDE наберите <code>bus.on('</code> — автодополнение предложит ровно два события; в колбэке параметры уже типизированы. Это то, ради чего пишут generics: библиотека ничего не знает о ваших событиях, а IDE знает всё.</p></div>
+<div class="why"><b>Зачем:</b> <b>Mapped type в действии</b>: <code>{ [K in keyof Events]?: Listener&lt;Events[K]&gt;[] }</code> строит объект с теми же ключами, что у карты событий, и значением, зависящим от ключа. <b>Generic-метод внутри generic-класса</b>: <code>K extends keyof Events</code> связывает имя события с типом его аргументов — <code>...args: Events[K]</code>. <b>Именованные кортежи</b> <code>[item: Item, quantity: number]</code> — подписи в подсказках. Точка с запятой перед <code>(this.listeners…</code> — защита от ASI: без неё строка «прилипнет» к предыдущей как вызов функции.</div>
+<details class="deep"><summary>🔬 Под капотом: почему EventMap — Record&lt;string, readonly unknown[]&gt;, а не any[]</summary><div class="deep-body">
+
+<p><code>unknown[]</code> — «кортеж любых аргументов, но конкретный кортеж задаст потребитель». Если написать <code>any[]</code>, ограничение не помешает, но всё, что выведется из <code>Events[K]</code>, будет протекать как <code>any</code> в местах, где потребитель забыл указать тип. <code>readonly</code> — чтобы принимались и кортежи-литералы, и <code>as const</code>. Общее правило: в ограничениях generics используйте <code>unknown</code>, не <code>any</code>.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Добавьте метод <code>once(event, listener)</code>. Как вернуть функцию отписки, если слушатель обёрнут?</li><li>Сделайте <code>emit</code> возвращающим <code>boolean</code> — «были ли слушатели». Изменится ли что-то в типах?</li></ul></div>
+</div></div>
+<div class="step" id="step-3-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-3"></label><span class="num">Шаг 3.3</span>Утилитные типы, groupBy с условием, satisfies для конфига<a class="anchor" href="#step-3-3">#</a></span><div class="step-body">
+<pre><code>// packages/core/src/lib/group-by.ts
+/** Группировка по ключу, значение которого — строка/число (иначе не может быть ключом объекта). */
+export function groupBy&lt;T, K extends keyof T&gt;(list: readonly T[], key: K): Record&lt;string, T[]&gt; {
+  const out: Record&lt;string, T[]&gt; = {}
+  for (const x of list) (out[String(x[key])] ??= []).push(x)     // String(): значение по ключу может быть чем угодно (T[K])
+  return out
+}
+// groupBy(movements, 'kind')  ✔  → Record&lt;string, Movement[]&gt;     groupBy(movements, 'qtyy')  ✖ TS2345 — нет такого ключа
+// упражнение: ограничьте K так, чтобы T[K] был string | number (подсказка: mapped type «ключи, чьи значения — PropertyKey»)
+
+// packages/core/src/domain/dto.ts — производные типы через утилиты
+import type { Item } from './item.js'
+import type { Movement, MovementKind } from './movement.js'
+
+export type NewItem   = Omit&lt;Item, 'id'&gt;                      // создание: id выдаёт система
+export type ItemPatch = Partial&lt;Omit&lt;Item, 'id' | 'sku'&gt;&gt;     // обновление: что угодно, кроме идентичности
+export type ItemView  = Readonly&lt;Pick&lt;Item, 'id' | 'name' | 'unit'&gt;&gt; &amp; { readonly stock: number }   // проекция для вывода
+
+export type Totals&lt;K extends string&gt; = Readonly&lt;Record&lt;K, number&gt;&gt;
+export type MovementTotals = Totals&lt;MovementKind&gt;              // { in: number; out: number; transfer: number; adjust: number }
+
+export function totalsByKind(movements: readonly Movement[]): MovementTotals {
+  const acc = { in: 0, out: 0, transfer: 0, adjust: 0 } satisfies Record&lt;MovementKind, number&gt;   // satisfies: если появится 5-й kind — ошибка здесь
+  for (const m of movements) acc[m.kind] += m.qty
+  return acc
+}</code></pre>
+<pre><code>// packages/core/src/config.ts — satisfies vs аннотация
+import { UNITS, type Unit } from './domain/item.js'
+
+type WarehouseConfig = {
+  defaultUnit: Unit
+  lowStockFactor: number
+  locations: readonly string[]
+}
+
+export const config = {
+  defaultUnit: 'pcs',
+  lowStockFactor: 1.2,
+  locations: ['A1', 'A2', 'B1'],
+} satisfies WarehouseConfig
+
+config.defaultUnit            // тип: 'pcs' — литерал сохранён (с `: WarehouseConfig` было бы Unit)
+config.locations[0]           // 'A1' | 'A2' | 'B1' | undefined — кортеж литералов, а не string[]
+// const bad = { defaultUnit: 'box', lowStockFactor: 1, locations: [] } satisfies WarehouseConfig   // ✖ 'box' не Unit — проверка есть</code></pre>
+<pre><code>// packages/core/src/lib/group-by.test.ts + dto.test.ts — коротко
+import { it, expect, expectTypeOf } from 'vitest'
+import { groupBy } from './group-by.js'
+import { totalsByKind, type ItemPatch, type NewItem } from '../domain/dto.js'
+import { config } from '../config.js'
+
+it('groupBy by kind', () =&gt; {
+  const g = groupBy([{ kind: 'in', qty: 1 }, { kind: 'out', qty: 2 }, { kind: 'in', qty: 3 }], 'kind')
+  expect(Object.keys(g)).toEqual(['in', 'out'])
+  expect(g['in']?.length).toBe(2)                                   // noUncheckedIndexedAccess → ?.
+})
+
+it('types: DTOs', () =&gt; {
+  expectTypeOf&lt;NewItem&gt;().not.toHaveProperty('id')
+  expectTypeOf&lt;ItemPatch&gt;().toEqualTypeOf&lt;{ name?: string; unit?: 'pcs' | 'kg' | 'l'; minStock?: number }&gt;()
+  expectTypeOf(config.defaultUnit).toEqualTypeOf&lt;'pcs'&gt;()
+  expect(totalsByKind([])).toEqual({ in: 0, out: 0, transfer: 0, adjust: 0 })
+})</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>13 passed. Проверьте вручную: добавьте в <code>Movement</code> пятый kind (как в 2.2) — <code>satisfies Record&lt;MovementKind, number&gt;</code> в <code>totalsByKind</code> даст ошибку «Property 'return' is missing». Уберите.</p></div>
+<div class="why"><b>Зачем:</b> <b>Утилиты вместо копий</b>: <code>NewItem</code>, <code>ItemPatch</code>, <code>ItemView</code> выведены из <code>Item</code> — добавите поле в <code>Item</code>, и все производные обновятся. Это DRY на уровне типов. <b><code>satisfies</code></b> — проверка «соответствует ли», сохраняющая точный выведенный тип: конфиг проверен, а литералы <code>'pcs'</code> и кортеж локаций остались. <b><code>groupBy&lt;T, K extends keyof T&gt;</code></b> — generic с двумя параметрами, где второй ограничен первым: ключ проверяется на существование в <code>T</code>, а <code>Record&lt;string, T[]&gt;</code> честно говорит, что ключи результата — строки.</div>
+<details class="deep"><summary>🔬 Под капотом: satisfies vs as vs аннотация — три разных вещи</summary><div class="deep-body">
+
+<table>
+<tr><th></th><th><code>const x: T = v</code></th><th><code>v as T</code></th><th><code>v satisfies T</code></th></tr>
+<tr><td>Проверяет совместимость</td><td>да</td><td>слабо (только «пересекаются»)</td><td>да</td></tr>
+<tr><td>Тип переменной</td><td>T (литералы теряются)</td><td>T (даже если врёт)</td><td>выведенный из v (литералы сохранены)</td></tr>
+<tr><td>Когда</td><td>публичный контракт</td><td>«я знаю лучше» (DOM, JSON после проверки)</td><td>конфиги, словари, объекты-константы</td></tr>
+</table>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>ItemPatch</code> исключает <code>sku</code>? Это решение типов или бизнеса? Где ему место, если бизнес передумает?</li><li>Напишите <code>type DeepReadonly&lt;T&gt;</code> рекурсивно (mapped + conditional). Примените к <code>config</code>: что меняется?</li></ul></div>
+</div></div>
+<div class="step" id="step-3-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-4"></label><span class="num">Шаг 3.4</span>Сервис Warehouse: DI через интерфейсы, DistributiveOmit, события, восстановление из журнала<a class="anchor" href="#step-3-4">#</a></span><div class="step-body">
+<pre><code>// packages/core/src/warehouse.ts — сервис из кубиков
+import { itemId, movementId, type ItemId, type LocationId } from './domain/ids.js'
+import type { Item } from './domain/item.js'
+import type { NewItem } from './domain/dto.js'
+import type { Movement } from './domain/movement.js'
+import { applyMovement, quantity, type Stock, type StockError } from './domain/stock.js'
+import { ok, type Result } from './lib/result.js'
+import type { Repository } from './lib/repository.js'
+import { TypedEmitter } from './lib/typed-emitter.js'
+import { randomUUID } from 'node:crypto'
+
+export type WarehouseEvents = {                                   // type, не interface: у type есть неявная index-сигнатура,
+  'movement.applied': [movement: Movement, stock: Stock]           // поэтому он подходит под ограничение EventMap,
+  'stock.low':        [item: Item, location: LocationId, quantity: number]   // а keyof остаётся точным union из двух имён
+}
+
+export interface WarehouseDeps {                                  // зависимости — интерфейсы: DI как в ООП-лабе
+  items: Repository&lt;Item&gt;
+  movements: Repository&lt;Movement&gt;
+  events?: TypedEmitter&lt;WarehouseEvents&gt;
+  now?: () =&gt; Date
+  nextId?: () =&gt; string
+}
+
+export class Warehouse {
+  private stock: Stock = {}
+  readonly events: TypedEmitter&lt;WarehouseEvents&gt;
+  private readonly now: () =&gt; Date
+  private readonly nextId: () =&gt; string
+
+  constructor(private readonly deps: WarehouseDeps) {
+    this.events = deps.events ?? new TypedEmitter()
+    this.now    = deps.now ?? (() =&gt; new Date())
+    this.nextId = deps.nextId ?? randomUUID
+    for (const m of deps.movements.list()) {                      // восстановить остатки из журнала
+      const r = applyMovement(this.stock, m)
+      if (r.ok) this.stock = r.value
+    }
+  }
+
+  addItem(input: NewItem): Item {
+    const item: Item = { id: itemId(input.sku.toLowerCase()), ...input }
+    this.deps.items.save(item)
+    return item
+  }
+
+  /** Принимает движение без id/at — их выдаёт сервис. Distributive Omit: применяется к каждому варианту union. */
+  apply(input: DistributiveOmit&lt;Movement, 'id' | 'at'&gt;): Result&lt;Stock, StockError | { code: 'UNKNOWN_ITEM'; itemId: ItemId }&gt; {
+    const item = this.deps.items.get(input.itemId)
+    if (!item) return { ok: false, error: { code: 'UNKNOWN_ITEM', itemId: input.itemId } }
+
+    const movement = { ...input, id: movementId(this.nextId()), at: this.now().toISOString() } as Movement
+    const r = applyMovement(this.stock, movement)
+    if (!r.ok) return r
+
+    this.stock = r.value
+    this.deps.movements.save(movement)
+    this.events.emit('movement.applied', movement, this.stock)
+    this.checkLow(item, movement)
+    return ok(this.stock)
+  }
+
+  quantity(item: ItemId, location: LocationId): number { return quantity(this.stock, item, location) }
+  snapshot(): Stock { return this.stock }
+
+  private checkLow(item: Item, m: Movement): void {
+    if (item.minStock === undefined) return
+    const locations = m.kind === 'in' ? [m.to] : m.kind === 'out' ? [m.from] : m.kind === 'transfer' ? [m.from, m.to] : [m.location]
+    for (const loc of locations) {
+      const q = this.quantity(item.id, loc)
+      if (q &lt; item.minStock) this.events.emit('stock.low', item, loc, q)
+    }
+  }
+}
+
+/** Omit, распределённый по union: Omit&lt;A | B, K&gt; сломал бы дискриминант; этот — нет. */
+export type DistributiveOmit&lt;T, K extends keyof any&gt; = T extends unknown ? Omit&lt;T, K&gt; : never</code></pre>
+<pre><code>// packages/core/src/warehouse.test.ts
+import { describe, it, expect, vi } from 'vitest'
+import { Warehouse } from './warehouse.js'
+import { InMemoryRepository } from './lib/repository.js'
+import { locationId, type Item, type Movement } from './index.js'
+
+function makeWarehouse() {
+  let n = 0
+  return new Warehouse({
+    items: new InMemoryRepository&lt;Item&gt;(),
+    movements: new InMemoryRepository&lt;Movement&gt;(),
+    now: () =&gt; new Date('2026-09-14T10:00:00Z'),                    // детерминированные время и id — те же приёмы, что Clock в ООП-лабе
+    nextId: () =&gt; `m${++n}`,
+  })
+}
+
+describe('Warehouse', () =&gt; {
+  it('applies movements and emits stock.low', () =&gt; {
+    const wh = makeWarehouse()
+    const bolt = wh.addItem({ sku: 'B6', name: 'Болт M6', unit: 'pcs', minStock: 5 })
+    const low = vi.fn()
+    wh.events.on('stock.low', low)
+
+    expect(wh.apply({ kind: 'in', itemId: bolt.id, to: locationId('A1'), qty: 10, unitCost: 2 }).ok).toBe(true)
+    expect(wh.apply({ kind: 'out', itemId: bolt.id, from: locationId('A1'), qty: 7, reason: 'sale' }).ok).toBe(true)
+
+    expect(wh.quantity(bolt.id, locationId('A1'))).toBe(3)
+    expect(low).toHaveBeenCalledWith(bolt, 'A1', 3)
+  })
+
+  it('unknown item is a typed error', () =&gt; {
+    const r = makeWarehouse().apply({ kind: 'in', itemId: 'ghost' as Item['id'], to: locationId('A1'), qty: 1, unitCost: 1 })
+    expect(!r.ok &amp;&amp; r.error.code).toBe('UNKNOWN_ITEM')
+  })
+
+  it('rebuilds stock from movement log', () =&gt; {
+    const wh = makeWarehouse()
+    const bolt = wh.addItem({ sku: 'B6', name: 'Болт', unit: 'pcs' })
+    wh.apply({ kind: 'in', itemId: bolt.id, to: locationId('A1'), qty: 4, unitCost: 1 })
+    // «перезапуск»: новый Warehouse на тех же репозиториях
+    const again = new Warehouse({ items: (wh as any).deps.items, movements: (wh as any).deps.movements })   // (any здесь — только чтобы не расширять API ради теста; см. вопрос)
+    expect(again.quantity(bolt.id, locationId('A1'))).toBe(4)
+  })
+})</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>16 passed. Наведите курсор на параметр <code>apply</code>: <code>DistributiveOmit&lt;Movement, 'id' | 'at'&gt;</code> развернулся в union из четырёх вариантов без <code>id/at</code>, и в тесте <code>{ kind: 'in', … }</code> проверяется по варианту <code>in</code> — попробуйте добавить <code>from</code> в приход.</p></div>
+<div class="why"><b>Зачем:</b> <b>Всё соединилось.</b> Сервис не знает, где хранятся данные (<code>Repository</code> — интерфейс), кто слушает события (<code>TypedEmitter</code>), сколько сейчас времени (<code>now</code>) — те же принципы DI, что в ООП-лабе, только без контейнера: зависимости — объект-литерал. <b><code>DistributiveOmit</code></b> — единственный «умный» тип сессии, и он нужен по делу: обычный <code>Omit&lt;A | B, K&gt;</code> сначала объединяет A и B в общую форму (теряя варианты), потом убирает ключи; распределительный — применяется к каждому варианту. Вы упёрлись в него, значит, поняли раздел 4.3. <b>Ошибка расширена</b>: <code>StockError | { code: 'UNKNOWN_ITEM' }</code> — union ошибок растёт, и <code>explain()</code> в CLI обязан будет обработать новый код.</div>
+<details class="deep"><summary>🔬 Под капотом: as Movement в apply — почему здесь каст оправдан, и как без него</summary><div class="deep-body">
+
+<p>После спреда <code>{ ...input, id, at }</code> TS выводит пересечение «union без id/at» &amp; «{ id; at }» — это корректный <code>Movement</code>, но компилятор не всегда умеет свернуть такое обратно в union. Каст <code>as Movement</code> — честное «я знаю, что это тот же union». Без каста: <code>switch (input.kind)</code> с четырьмя ветками, в каждой — свой объект. Многословно, зато без <code>as</code>. Выбор — ваш; в лабе каст с комментарием.</p>
+<p><code>(wh as any).deps</code> в тесте — плохой запах: тест лезет в private. Правильно — сделать репозитории в тесте переменными снаружи и передать их обоим Warehouse. Исправьте: это упражнение «проверь себя».</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите <code>as any</code> из третьего теста, переписав <code>makeWarehouse</code> так, чтобы репозитории были доступны. Сколько строк?</li><li>Замените <code>DistributiveOmit</code> на обычный <code>Omit</code>. Прочитайте ошибку в тесте. Какой тип получился и почему в нём нет <code>kind</code> как дискриминанта?</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 3 → ПЕРЕД СЕССИЕЙ 4</span><ul>
+<li>✅ <code>git commit -am "session 3: generics, repository, emitter, warehouse"</code></li>
+<li>📝 Ответы 3.1–3.4.</li>
+<li>📖 Почитать: <a href="https://nodejs.org/api/util.html#utilparseargsconfig" target="_blank">Node: util.parseArgs</a>, <a href="https://zod.dev/" target="_blank">Zod: Basic usage</a> и «Discriminated unions», <a href="https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html" target="_blank">Handbook: Declaration Files</a>.</li>
+</ul></div>
+<div class="session-banner" id="session-4">Сессия <a href="#session-4" style="color:#fff;text-decoration:none">4</a> — CLI: parseArgs, команды из template literal types, Zod, ошибки, .d.ts, сборка <span>~3,5 часа</span></div>
+<div class="step" id="step-4-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-1"></label><span class="num">Шаг 4.1</span>parseArgs, CommandName из template literal, диспетчер под satisfies, CliError<a class="anchor" href="#step-4-1">#</a></span><div class="step-body">
+<pre><code>mkdir -p packages/cli/src packages/cli/vendor data</code></pre>
+<pre><code>// packages/cli/package.json
+{
+  "name": "@warehouse/cli",
+  "version": "0.0.0",
+  "type": "module",
+  "bin": { "wh": "./dist/wh.js" },
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "build": "esbuild src/main.ts --bundle --platform=node --format=esm --outfile=dist/wh.js --banner:js='#!/usr/bin/env node'"
+  },
+  "dependencies": { "@warehouse/core": "*", "zod": "^3.23" },
+  "devDependencies": { "esbuild": "^0.24" }
+}
+// packages/cli/tsconfig.json
+{ "extends": "../../tsconfig.base.json", "include": ["src", "vendor/*.d.ts"] }
+
+// корень package.json → scripts
+"typecheck": "tsc --noEmit -p packages/core &amp;&amp; tsc --noEmit -p packages/cli &amp;&amp; echo OK",
+"wh": "npm run -w @warehouse/cli dev --"</code></pre>
+<pre><code>docker compose exec dev npm install</code></pre>
+<pre><code>// packages/cli/src/commands.ts — имена команд как тип, выведенный из одного объекта
+export const COMMANDS = {
+  item:   ['add', 'list'],
+  stock:  ['in', 'out', 'transfer', 'adjust', 'list', 'low'],
+  import: ['csv'],
+} as const
+
+type Commands = typeof COMMANDS
+/** 'item:add' | 'item:list' | 'stock:in' | … — template literal по группам, объединённый через indexed access [keyof Commands] */
+export type CommandName = { [G in keyof Commands]: `${G}:${Commands[G][number]}` }[keyof Commands]
+
+export function isCommandName(s: string): s is CommandName {
+  const [group, action] = s.split(':')                                        // string | undefined (noUncheckedIndexedAccess)
+  return group !== undefined &amp;&amp; group in COMMANDS
+    &amp;&amp; (COMMANDS[group as keyof Commands] as readonly string[]).includes(action ?? '')
+}
+
+export const allCommands: readonly CommandName[] =
+  (Object.keys(COMMANDS) as (keyof Commands)[]).flatMap(g =&gt; COMMANDS[g].map(a =&gt; `${g}:${a}` as CommandName))</code></pre>
+<pre><code>// packages/cli/src/args.ts — util.parseArgs выводит типы из конфига опций
+import { parseArgs } from 'node:util'
+
+export function parseCli(argv: readonly string[]) {
+  return parseArgs({
+    args: [...argv],
+    allowPositionals: true,
+    options: {
+      item:     { type: 'string',  short: 'i' },
+      from:     { type: 'string' },
+      to:       { type: 'string' },
+      location: { type: 'string',  short: 'l' },
+      qty:      { type: 'string',  short: 'q' },
+      cost:     { type: 'string' },
+      reason:   { type: 'string',  short: 'r' },
+      name:     { type: 'string' },
+      sku:      { type: 'string' },
+      unit:     { type: 'string' },
+      min:      { type: 'string' },
+      file:     { type: 'string',  short: 'f' },
+      json:     { type: 'boolean' },
+    },
+  })
+}
+export type CliValues = ReturnType&lt;typeof parseCli&gt;['values']       // { item?: string; json?: boolean; … } — выведено, не написано руками
+
+import { CliError } from './errors.js'
+
+/** Обязательная опция: сужает string | undefined → string или падает с понятной ошибкой. */
+export function need&lt;K extends keyof CliValues&gt;(values: CliValues, key: K): NonNullable&lt;CliValues[K]&gt; {
+  const v = values[key]
+  if (v === undefined) throw new CliError(`нужна опция --${key}`, 2)
+  return v as NonNullable&lt;CliValues[K]&gt;
+}
+export function needNumber(values: CliValues, key: keyof CliValues): number {
+  const n = Number(need(values, key))
+  if (!Number.isFinite(n)) throw new CliError(`--${key} должно быть числом`, 2)
+  return n
+}</code></pre>
+<pre><code>// packages/cli/src/errors.ts
+export class CliError extends Error {
+  constructor(message: string, readonly exitCode: number = 1) {
+    super(message)
+    this.name = 'CliError'
+  }
+}</code></pre>
+<pre><code>// packages/cli/src/main.ts — диспетчер: объект обработчиков, полнота которого проверяет satisfies
+import { Warehouse, JsonFileRepository, parseMovement, itemId, locationId, explain,
+         type Item, type Movement, UNITS, type Unit, type OutReason, OUT_REASONS } from '@warehouse/core'
+import { parseCli, need, needNumber, type CliValues as Values } from './args.js'
+import { allCommands, isCommandName, type CommandName } from './commands.js'
+import { CliError } from './errors.js'
+
+const isItem = (x: unknown): x is Item =&gt; typeof x === 'object' &amp;&amp; x !== null &amp;&amp; 'sku' in x &amp;&amp; 'unit' in x   // временно; Zod — в 4.2
+const isMovement = (x: unknown): x is Movement =&gt; parseMovement(x) !== null
+
+const wh = new Warehouse({
+  items:     new JsonFileRepository&lt;Item&gt;('data/items.json', isItem),
+  movements: new JsonFileRepository&lt;Movement&gt;('data/movements.json', isMovement),
+})
+wh.events.on('stock.low', (item, loc, q) =&gt; console.warn(`⚠ ${item.name} на ${loc}: ${q} &lt; ${item.minStock}`))
+
+type Handler = (v: Values) =&gt; void
+
+const handlers = {
+  'item:add': v =&gt; {
+    const unit = need(v, 'unit')
+    if (!(UNITS as readonly string[]).includes(unit)) throw new CliError(`--unit: ${UNITS.join('|')}`, 2)
+    const item = wh.addItem({ sku: need(v, 'sku'), name: need(v, 'name'), unit: unit as Unit, ...(v.min ? { minStock: needNumber(v, 'min') } : {}) })
+    console.log(`добавлен ${item.id}`)
+  },
+  'item:list': v =&gt; print(v, wh.items().map(i =&gt; [i.id, i.name, i.unit, i.minStock ?? '—']), ['id', 'name', 'unit', 'min']),
+
+  'stock:in':       v =&gt; report(wh.apply({ kind: 'in',       itemId: itemId(need(v, 'item')), to: locationId(need(v, 'to')), qty: needNumber(v, 'qty'), unitCost: needNumber(v, 'cost') })),
+  'stock:out':      v =&gt; report(wh.apply({ kind: 'out',      itemId: itemId(need(v, 'item')), from: locationId(need(v, 'from')), qty: needNumber(v, 'qty'), reason: outReason(need(v, 'reason')) })),
+  'stock:transfer': v =&gt; report(wh.apply({ kind: 'transfer', itemId: itemId(need(v, 'item')), from: locationId(need(v, 'from')), to: locationId(need(v, 'to')), qty: needNumber(v, 'qty') })),
+  'stock:adjust':   v =&gt; report(wh.apply({ kind: 'adjust',   itemId: itemId(need(v, 'item')), location: locationId(need(v, 'location')), qty: needNumber(v, 'qty'), reason: need(v, 'reason') })),
+  'stock:list':     v =&gt; print(v, Object.entries(wh.snapshot()).map(([k, q]) =&gt; [...k.split('@'), q]), ['item', 'location', 'qty']),
+  'stock:low':      v =&gt; print(v, wh.lowStock().map(r =&gt; [r.item.id, r.location, r.quantity, r.item.minStock ?? 0]), ['item', 'location', 'qty', 'min']),
+
+  'import:csv': () =&gt; { throw new CliError('см. шаг 4.2', 1) },
+} satisfies Record&lt;CommandName, Handler&gt;          // ← забудете команду из COMMANDS — ошибка компиляции ЗДЕСЬ
+
+function outReason(s: string): OutReason {
+  if (!(OUT_REASONS as readonly string[]).includes(s)) throw new CliError(`--reason: ${OUT_REASONS.join('|')}`, 2)
+  return s as OutReason
+}
+function report(r: ReturnType&lt;Warehouse['apply']&gt;): void {          // тип результата — из метода класса (indexed access + ReturnType)
+  if (r.ok) { console.log('✔ применено'); return }
+  const e = r.error
+  throw new CliError(e.code === 'UNKNOWN_ITEM' ? `неизвестный товар ${e.itemId}` : explain(e), 3)   // сужение: UNKNOWN_ITEM отдельно, остальное — explain
+}
+function print(v: Values, rows: (string | number)[][], headers: string[]): void {
+  if (v.json) { console.log(JSON.stringify(rows.map(r =&gt; Object.fromEntries(headers.map((h, i) =&gt; [h, r[i]]))), null, 2)); return }
+  for (const r of [headers, ...rows]) console.log(r.map(c =&gt; String(c).padEnd(14)).join(''))   // временно; красивая таблица — 4.3
+}
+
+function main(argv: readonly string[]): void {
+  const { values, positionals } = parseCli(argv)
+  const name = positionals[0]
+  if (name === undefined || name === 'help') { console.log('команды:\n  ' + allCommands.join('\n  ')); return }
+  if (!isCommandName(name)) throw new CliError(`неизвестная команда ${name}; см. wh help`, 2)
+  handlers[name](values)                                             // name: CommandName → handlers[name] точно есть
+}
+
+try { main(process.argv.slice(2)) }
+catch (e) {                                                          // e: unknown
+  if (e instanceof CliError) { console.error(`✖ ${e.message}`); process.exitCode = e.exitCode }
+  else { console.error('неожиданная ошибка:', e); process.exitCode = 70 }
+}</code></pre>
+<pre><code>// packages/core/src/warehouse.ts — два метода, которых не хватало CLI
+items(): readonly Item[] { return this.deps.items.list() }
+
+lowStock(): readonly LowStockRow[] {
+  const out: LowStockRow[] = []
+  for (const [key, quantity] of Object.entries(this.stock)) {
+    const [id, loc] = key.split('@')
+    const item = id !== undefined ? this.deps.items.get(itemId(id)) : undefined
+    if (item?.minStock !== undefined &amp;&amp; loc !== undefined &amp;&amp; quantity &lt; item.minStock) out.push({ item, location: locationId(loc), quantity })
+  }
+  return out
+}
+export type LowStockRow = { item: Item; location: LocationId; quantity: number }
+// и в index.ts: export * from './warehouse.js'; export * from './lib/repository.js'; export * from './lib/json-repository.js'</code></pre>
+<pre><code>docker compose exec dev npm run typecheck
+docker compose exec dev npm run wh -- item:add --sku B6 --name "Болт M6" --unit pcs --min 20
+docker compose exec dev npm run wh -- stock:in --item b6 --to A1 --qty 50 --cost 2.5
+docker compose exec dev npm run wh -- stock:out --item b6 --from A1 --qty 35 --reason sale
+docker compose exec dev npm run wh -- stock:list --json
+docker compose exec dev npm run wh -- stock:out --item b6 --from A1 --qty 99 --reason sale; echo "exit=$?"
+docker compose exec dev npm run wh -- stock:flip; echo "exit=$?"
+cat data/movements.json</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>добавлен b6
+✔ применено
+⚠ Болт M6 на A1: 15 < 20
+✔ применено
+[ { "item": "b6", "location": "A1", "qty": 15 } ]
+✖ на складе A1 только 15 b6, нужно 99
+exit=3
+✖ неизвестная команда stock:flip; см. wh help
+exit=2</pre><p>Между запусками остатки восстанавливаются из <code>data/movements.json</code>. Удалите <code>'stock:low'</code> из <code>handlers</code> — <code>satisfies</code> скажет «Property 'stock:low' is missing».</p></div>
+<div class="why"><b>Зачем:</b> <b>Один источник правды для команд</b>: <code>COMMANDS</code> — объект; из него выведены тип <code>CommandName</code> (template literal + mapped + indexed access), список для help и проверка для ввода. <b><code>satisfies Record&lt;CommandName, Handler&gt;</code></b> — полнота диспетчера проверяется компилятором, как <code>assertNever</code> для switch. <b><code>parseArgs</code></b> выводит тип значений из конфига — вы не писали тип <code>CliValues</code>, вы его взяли через <code>ReturnType</code>. <b><code>need()</code></b> — generic по ключу: возвращаемый тип <code>NonNullable&lt;CliValues[K]&gt;</code> зависит от того, какой ключ попросили (для <code>json</code> — <code>boolean</code>). <b>Ошибки</b>: класс с exit-кодом, <code>instanceof</code> в <code>catch (e: unknown)</code>, коды 2 (ввод), 3 (бизнес), 70 (баг) — контракт CLI с оболочкой.</div>
+<details class="deep"><summary>🔬 Под капотом: handlers[name](values): почему индексация типизирована</summary><div class="deep-body">
+
+<p><code>handlers</code> после <code>satisfies</code> имеет выведенный тип объекта с 9 конкретными ключами. <code>name: CommandName</code> — union из тех же 9 литералов. Индексация объекта union-ом литералов даёт union типов значений — все они <code>Handler</code>, вызов корректен. Если бы <code>name</code> был <code>string</code>, TS сказал бы «no index signature» — и это правильно: строка из argv не обязана быть командой. Именно поэтому нужен <code>isCommandName</code> — сужение <code>string → CommandName</code> перед индексацией.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Что вернёт <code>need(v, 'json')</code> и почему <code>needNumber(v, 'json')</code> — ошибка компиляции… или нет? Проверьте и объясните через <code>keyof CliValues</code>.</li><li>Добавьте команду <code>item:remove</code> в <code>COMMANDS</code>, ничего больше не меняя, и прочитайте все ошибки. Сколько мест «знали» о списке команд?</li></ul></div>
+</div></div>
+<div class="step" id="step-4-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-2"></label><span class="num">Шаг 4.2</span>Zod: схема = валидация + тип; toMovement как граница; import:csv с тремя видами отказов<a class="anchor" href="#step-4-2">#</a></span><div class="step-body">
+<pre><code>// packages/core/src/schemas/movement.ts — Zod: схема = валидация + тип
+import { z } from 'zod'
+import { OUT_REASONS } from '../domain/movement.js'
+import { UNITS } from '../domain/item.js'
+
+const base = {
+  itemId: z.string().min(1),
+  qty:    z.coerce.number(),                     // coerce: '5' из CSV → 5
+  note:   z.string().optional(),
+}
+export const MovementInputSchema = z.discriminatedUnion('kind', [
+  z.object({ ...base, kind: z.literal('in'),       to: z.string().min(1),   unitCost: z.coerce.number().nonnegative(), qty: z.coerce.number().positive() }),
+  z.object({ ...base, kind: z.literal('out'),      from: z.string().min(1), reason: z.enum(OUT_REASONS),               qty: z.coerce.number().positive() }),
+  z.object({ ...base, kind: z.literal('transfer'), from: z.string().min(1), to: z.string().min(1),                     qty: z.coerce.number().positive() }),
+  z.object({ ...base, kind: z.literal('adjust'),   location: z.string().min(1), reason: z.string().min(1) }),
+])
+export type MovementInput = z.infer&lt;typeof MovementInputSchema&gt;       // тип выведен из схемы
+
+export const ItemSchema = z.object({
+  id: z.string().min(1), sku: z.string().min(1), name: z.string().min(1),
+  unit: z.enum(UNITS), minStock: z.number().nonnegative().optional(),
+})
+export type ItemInput = z.infer&lt;typeof ItemSchema&gt;
+
+// packages/core/src/schemas/to-domain.ts — граница: MovementInput (строки) → Movement без id/at (branded)
+import { itemId, locationId } from '../domain/ids.js'
+import type { Movement } from '../domain/movement.js'
+import type { DistributiveOmit } from '../warehouse.js'
+import type { MovementInput } from './movement.js'
+
+export function toMovement(m: MovementInput): DistributiveOmit&lt;Movement, 'id' | 'at'&gt; {
+  const note = m.note === undefined ? {} : { note: m.note }
+  switch (m.kind) {                                                        // без каста: каждая ветка строит свой вариант
+    case 'in':       return { ...note, kind: 'in',       itemId: itemId(m.itemId), to: locationId(m.to), qty: m.qty, unitCost: m.unitCost }
+    case 'out':      return { ...note, kind: 'out',      itemId: itemId(m.itemId), from: locationId(m.from), qty: m.qty, reason: m.reason }
+    case 'transfer': return { ...note, kind: 'transfer', itemId: itemId(m.itemId), from: locationId(m.from), to: locationId(m.to), qty: m.qty }
+    case 'adjust':   return { ...note, kind: 'adjust',   itemId: itemId(m.itemId), location: locationId(m.location), qty: m.qty, reason: m.reason }
+  }
+}</code></pre>
+<pre><code>// packages/core/src/schemas/movement.test.ts
+import { it, expect, expectTypeOf } from 'vitest'
+import { MovementInputSchema, type MovementInput } from './movement.js'
+import type { MovementOf } from '../domain/movement.js'
+
+it('coerces CSV strings and rejects nonsense', () =&gt; {
+  const r = MovementInputSchema.safeParse({ kind: 'in', itemId: 'b6', to: 'A1', qty: '5', unitCost: '2.5' })
+  expect(r.success &amp;&amp; r.data.qty).toBe(5)                                        // '5' → 5
+  const bad = MovementInputSchema.safeParse({ kind: 'out', itemId: 'b6', from: 'A1', qty: '5', reason: 'gift' })
+  expect(!bad.success &amp;&amp; bad.error.issues[0]?.path).toEqual(['reason'])          // где именно ошибка
+})
+
+it('types: schema type mirrors the domain shape (minus branding)', () =&gt; {
+  expectTypeOf&lt;Extract&lt;MovementInput, { kind: 'in' }&gt;['unitCost']&gt;().toBeNumber()
+  expectTypeOf&lt;Extract&lt;MovementInput, { kind: 'in' }&gt;&gt;().not.toHaveProperty('from')
+  expectTypeOf&lt;MovementOf&lt;'out'&gt;['reason']&gt;().toEqualTypeOf&lt;Extract&lt;MovementInput, { kind: 'out' }&gt;['reason']&gt;()   // OUT_REASONS — один источник
+})</code></pre>
+<pre><code>// packages/cli/src/main.ts — заменить ручные guards и реализовать import:csv
+import { ItemSchema, MovementInputSchema, toMovement, type Item, type Movement } from '@warehouse/core'
+import { readFileSync } from 'node:fs'
+
+const isItem = (x: unknown): x is Item =&gt; ItemSchema.safeParse(x).success       // но! ItemInput ≠ Item: id там string, здесь ItemId
+                                                                                 // предикат «x is Item» — наше обещание; ItemSchema его подкрепляет
+const isMovement = (x: unknown): x is Movement =&gt; MovementInputSchema.safeParse(x).success &amp;&amp; 'id' in (x as object) &amp;&amp; 'at' in (x as object)
+
+// в handlers:
+'import:csv': v =&gt; {
+  const [header = '', ...lines] = readFileSync(need(v, 'file'), 'utf8').trim().split('\n')
+  const cols = header.split(',')
+  let okCount = 0
+  const failures: string[] = []
+  lines.forEach((line, i) =&gt; {
+    const raw = Object.fromEntries(cols.map((c, j) =&gt; [c.trim(), line.split(',')[j]?.trim()]))   // unknown-ish: Record&lt;string, string | undefined&gt;
+    const parsed = MovementInputSchema.safeParse(raw)
+    if (!parsed.success) { failures.push(`строка ${i + 2}: ${parsed.error.issues.map(is =&gt; `${is.path.join('.')}: ${is.message}`).join('; ')}`); return }
+    const r = wh.apply(toMovement(parsed.data))
+    if (r.ok) okCount++
+    else failures.push(`строка ${i + 2}: ${r.error.code === 'UNKNOWN_ITEM' ? `неизвестный товар ${r.error.itemId}` : explain(r.error)}`)
+  })
+  console.log(`импортировано ${okCount}, ошибок ${failures.length}`)
+  failures.forEach(f =&gt; console.error('  ✖ ' + f))
+  if (failures.length) process.exitCode = 3
+},</code></pre>
+<pre><code>cat &gt; data/moves.csv &lt;&lt;'EOF'
+kind,itemId,from,to,location,qty,unitCost,reason
+in,b6,,A1,,100,2.4,
+transfer,b6,A1,B2,,30,,
+out,b6,B2,,,5,,sale
+out,b6,B2,,,50,,sale
+in,ghost,,A1,,1,1,
+out,b6,A1,,,1,,gift
+EOF
+docker compose exec dev npm run typecheck &amp;&amp; docker compose exec dev npm test
+docker compose exec dev npm run wh -- import:csv --file data/moves.csv; echo "exit=$?"
+docker compose exec dev npm run wh -- stock:list</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>импортировано 3, ошибок 3
+  ✖ строка 5: на складе B2 только 25 b6, нужно 50
+  ✖ строка 6: неизвестный товар ghost
+  ✖ строка 7: reason: Invalid enum value. Expected 'sale' | 'writeoff' | 'sample', received 'gift'
+exit=3
+item  location  qty
+b6    A1        85
+b6    B2        25</pre><p>Три вида отказа — валидация (Zod), домен (StockError), сервис (UNKNOWN_ITEM) — три разных источника, один формат вывода. 18 passed.</p></div>
+<div class="why"><b>Зачем:</b> <b>Схема как единственный источник правды</b>: <code>MovementInputSchema</code> проверяет в рантайме <i>и</i> порождает тип — тест на типы подтверждает, что он совпадает с доменным <code>Movement</code> с точностью до брендов. <code>z.enum(OUT_REASONS)</code> берёт тот же <code>as const</code>-массив, что и тип <code>OutReason</code>: три места (тип, схема, help) питаются от одного значения. <b><code>toMovement</code></b> — явная граница «строки → branded»: единственное место, где вызываются <code>itemId()</code>/<code>locationId()</code> для внешних данных, и без единого <code>as</code> благодаря switch по вариантам. <b><code>z.coerce</code></b> — CSV даёт строки; coerce делает <code>'5' → 5</code> с проверкой, в отличие от <code>Number()</code> с <code>NaN</code>.</div>
+<details class="deep"><summary>🔬 Под капотом: guard isItem всё ещё «обещание» — и как сделать честно</summary><div class="deep-body">
+
+<p><code>ItemSchema</code> выводит <code>id: string</code>, а <code>Item</code> требует <code>ItemId</code>. Предикат <code>x is Item</code> проходит проверку схемы и <i>обещает</i> бренд — это осознанный компромисс на границе файла, который мы сами и записали. Честный вариант: <code>JsonFileRepository</code> принимает не guard, а <code>parse: (x: unknown) =&gt; T | null</code>, и вы отдаёте <code>x =&gt; { const r = ItemSchema.safeParse(x); return r.success ? { ...r.data, id: itemId(r.data.id) } : null }</code>. Сделайте это — <code>load()</code> станет <code>raw.map(parse).filter(x =&gt; x !== null)</code>, и последний <code>as</code> на границе исчезнет. Zod умеет и <code>.transform()</code>, и <code>.brand()</code> — посмотрите, как сделать бренд прямо в схеме.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>qty</code> у <code>adjust</code> не <code>.positive()</code>, а у остальных — да? Где ещё это правило было записано (2.3) и не дублирование ли это?</li><li>Замените <code>z.discriminatedUnion</code> на <code>z.union</code>. Что изменится в сообщениях об ошибках и в производительности? Почему дискриминант важен и для Zod?</li></ul></div>
+</div></div>
+<div class="step" id="step-4-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-3"></label><span class="num">Шаг 4.3</span>Декларации: .d.ts для vendor/table.js, declare module, declare global<a class="anchor" href="#step-4-3">#</a></span><div class="step-body">
+<p>Красивую таблицу печатает «старый» JS-модуль без типов. Описываем его форму в <code>.d.ts</code>, не переписывая.</p><pre><code>// packages/cli/vendor/table.js — как будто досталось в наследство; трогать нельзя
+export function render(rows, headers = [], opts = {}) {
+  const all = headers.length ? [headers, ...rows] : rows
+  const widths = all[0].map((_, i) =&gt; Math.max(...all.map(r =&gt; String(r[i] ?? '').length)))
+  const line = r =&gt; '│ ' + r.map((c, i) =&gt; String(c ?? '').padEnd(widths[i])).join(' │ ') + ' │'
+  const sep = '├─' + widths.map(w =&gt; '─'.repeat(w)).join('─┼─') + '─┤'
+  const out = all.map(line)
+  if (headers.length) out.splice(1, 0, sep)
+  if (opts.footer) out.push(sep, line(opts.footer))
+  return out.join('\n')
+}</code></pre>
+<pre><code>// packages/cli/vendor/table.d.ts — декларация рядом с .js: TS находит её по имени
+export type Cell = string | number | null | undefined
+
+export interface RenderOptions {
+  /** строка итогов под таблицей */
+  footer?: readonly Cell[]
+}
+
+export function render(
+  rows: readonly (readonly Cell[])[],
+  headers?: readonly string[],
+  opts?: RenderOptions,
+): string</code></pre>
+<pre><code>// packages/cli/src/main.ts
+import { render } from '../vendor/table.js'                     // импорт .js; типы — из table.d.ts
+
+function print(v: Values, rows: (string | number)[][], headers: string[]): void {
+  if (v.json) { … как было … ; return }
+  console.log(render(rows, headers))
+}
+// render(rows, headers, { footer: ['итого', '', rows.length] })   ✔
+// render(rows, headers, { foter: [] })                             ✖ TS2561: Did you mean 'footer'?</code></pre>
+<p>И ещё два вида деклараций, которые встречаются постоянно — добавьте файл <code>packages/cli/src/globals.d.ts</code>:</p><pre><code>// packages/cli/src/globals.d.ts
+/** Константа, которую подставит esbuild при сборке (--define). В dev её нет — см. main.ts. */
+declare const __WH_VERSION__: string | undefined
+
+/** Модуль без типов (пример; в проекте не используется): */
+declare module 'legacy-csv-parser' {
+  export function parse(text: string): string[][]
+}
+
+/** Расширение чужого интерфейса — declaration merging: */
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv { WH_DATA_DIR?: string }           // process.env.WH_DATA_DIR теперь типизирован
+  }
+}
+export {}                                                 // файл — модуль, иначе declare global не работает</code></pre>
+<pre><code>// main.ts — использовать:
+const dataDir = process.env.WH_DATA_DIR ?? 'data'          // string — из merged ProcessEnv
+if (positionals[0] === 'version') { console.log(typeof __WH_VERSION__ === 'string' ? __WH_VERSION__ : 'dev'); return }</code></pre>
+<pre><code>docker compose exec dev npm run typecheck &amp;&amp; docker compose exec dev npm run wh -- stock:list</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>│ item │ location │ qty │
+├──────┼──────────┼─────┤
+│ b6   │ A1       │ 85  │
+│ b6   │ B2       │ 25  │</pre><p>Опечатка в имени опции таблицы — ошибка компиляции с подсказкой «Did you mean». <code>process.env.WH_DATA_DIR</code> автодополняется.</p></div>
+<div class="why"><b>Зачем:</b> <b><code>.d.ts</code> — типы без реализации</b>: так устроены типы всего npm (<code>@types/*</code>, поле <code>types</code> в пакетах). Вы описали контракт чужого кода, и с этого момента компилятор проверяет вызовы, а IDE подсказывает опции. <b><code>declare</code></b> — «это существует, я только описываю». <b>Declaration merging</b> — интерфейсы с одним именем сливаются; так расширяют <code>process.env</code>, <code>Request</code> в Express, <code>Window</code>. <b><code>export {}</code></b> в конце — превращает файл в модуль, без чего <code>declare global</code> не работает; частая загадка.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>В <code>table.d.ts</code> <code>rows</code> — <code>readonly (readonly Cell[])[]</code>, а <code>print</code> передаёт <code>(string | number)[][]</code>. Почему это компилируется? (Подсказка: mutable присваивается в readonly, но не наоборот.)</li><li>Что произойдёт, если <code>table.d.ts</code> объявит <code>render</code> с двумя параметрами, а JS на самом деле требует три? Кто заметит и когда?</li></ul></div>
+</div></div>
+<div class="step" id="step-4-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-4"></label><span class="num">Шаг 4.4</span>Сборка esbuild, --define, bin<a class="anchor" href="#step-4-4">#</a></span><div class="step-body">
+<pre><code>docker compose exec dev npm run -w @warehouse/cli build -- --define:__WH_VERSION__='"0.1.0"'
+ls -la packages/cli/dist/                                   # wh.js ~ 60–80 KB: core + zod внутри, node:* — снаружи
+docker compose exec dev node packages/cli/dist/wh.js version   # 0.1.0
+docker compose exec dev node packages/cli/dist/wh.js stock:list
+docker compose exec dev sh -c "cd packages/cli &amp;&amp; npm link &amp;&amp; wh help"   # опционально: команда wh в PATH контейнера</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Один файл <code>dist/wh.js</code> с shebang, запускается без tsx, версия подставлена при сборке. <code>npm run typecheck</code> по-прежнему зелёный — сборка и проверка типов независимы.</p></div>
+<div class="why"><b>Зачем:</b> <b>esbuild собирает, tsc проверяет.</b> esbuild не знает о типах вообще — он их вырезает и склеивает модули (включая <code>@warehouse/core</code> из workspace и <code>zod</code>). Поэтому CI — две команды: <code>typecheck</code> и <code>build</code>; первая может упасть, когда вторая проходит. <code>--define</code> подставляет константу, объявленную в <code>globals.d.ts</code> через <code>declare const</code>: типы знают о ней, рантайм получает значение при сборке. <b>Альтернатива</b> — <code>tsc -b</code> с project references и <code>dist/</code> у каждого пакета: правильнее для библиотек, тяжелее в настройке; см. «что дальше».</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Откройте <code>dist/wh.js</code> и найдите <code>applyMovement</code>. Есть ли там что-нибудь от типов? А от <code>Brand</code>?</li><li>Что случится с <code>dist/wh.js</code>, если в <code>core</code> появится ошибка типов, а вы запустите только <code>build</code>?</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 4 → ПЕРЕД СЕССИЕЙ 5</span><ul>
+<li>✅ <code>git commit -am "session 4: cli"</code></li>
+<li>📝 Ответы 4.1–4.4.</li>
+<li>📖 Почитать: <a href="https://vuejs.org/guide/typescript/composition-api.html" target="_blank">Vue: TypeScript with Composition API</a>; <a href="https://expressjs.com/en/guide/typescript.html" target="_blank">Express + TypeScript</a> (кратко).</li>
+</ul></div>
+<div class="session-banner" id="session-5">Сессия <a href="#session-5" style="color:#fff;text-decoration:none">5</a> — Сквозная типизация: ApiContract → Express → typed client → Vue + TS <span>~3,5 часа</span></div>
+<div class="step" id="step-5-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-5-1"></label><span class="num">Шаг 5.1</span>ApiContract и generic-клиент с conditional types<a class="anchor" href="#step-5-1">#</a></span><div class="step-body">
+<p>Контракт API — тип в <code>core</code>, который читают и сервер, и клиент. Изменили ответ на сервере — клиент не скомпилируется.</p><pre><code>// packages/core/src/domain/ids.ts — добавить: снятие брендов на границе
+/** Для каждого варианта union: все branded-строки → string. Mapped + conditional, распределённо (T extends unknown). */
+export type Debrand&lt;T&gt; = T extends unknown
+  ? { [K in keyof T]: T[K] extends Brand&lt;string, string&gt; ? string : T[K] }
+  : never
+
+// packages/core/src/domain/stock.ts — одна правка: explain принимает и branded, и «снятую» ошибку
+export function explain(e: Debrand&lt;StockError&gt;): string { /* тело без изменений: StockError присваивается в Debrand&lt;StockError&gt; */ }</code></pre>
+<pre><code>// packages/core/src/api-contract.ts
+import type { Debrand } from './domain/ids.js'
+import type { Item } from './domain/item.js'
+import type { Movement } from './domain/movement.js'
+import { explain, type StockError } from './domain/stock.js'
+import type { Result } from './lib/result.js'
+import type { MovementInput } from './schemas/movement.js'
+
+/** Плоская строка остатка — для JSON и таблиц; без брендов, потому что это уже граница. */
+export type StockRow = { itemId: string; location: string; quantity: number }
+
+export type ApplyError =
+  | Debrand&lt;StockError&gt;                                              // те же коды и поля, itemId/location — string
+  | { code: 'UNKNOWN_ITEM'; itemId: string }
+  | { code: 'VALIDATION';   issues: string[] }
+
+export type ApiContract = {
+  'GET /items':      { response: Item[] }
+  'GET /movements':  { response: Movement[] }
+  'GET /stock':      { query?: { location?: string }; response: StockRow[] }
+  'POST /movements': { body: MovementInput; response: Result&lt;StockRow[], ApplyError&gt; }
+}
+export type Route = keyof ApiContract
+
+export function explainApplyError(e: ApplyError): string {         // exhaustive; CLI тоже переходит на него
+  switch (e.code) {
+    case 'UNKNOWN_ITEM': return `неизвестный товар ${e.itemId}`
+    case 'VALIDATION':   return `некорректные данные: ${e.issues.join('; ')}`
+    default:             return explain(e)                           // остальное — Debrand&lt;StockError&gt;: сужение через default
+  }
+}</code></pre>
+<pre><code>// packages/core/src/api/client.ts — один generic-запрос на все маршруты
+import type { ApiContract, Route } from '../api-contract.js'
+
+type Opts&lt;R extends Route&gt; = Omit&lt;ApiContract[R], 'response'&gt;                     // { query?: … } | { body: … } | {}
+/** Если все опции необязательны ({} подходит) — аргумент необязателен; иначе (есть body) — обязателен. */
+type Args&lt;R extends Route&gt; = {} extends Opts&lt;R&gt; ? [opts?: Opts&lt;R&gt;] : [opts: Opts&lt;R&gt;]
+
+export function createClient(baseUrl: string, fetchImpl: typeof fetch = fetch) {
+  return async function request&lt;R extends Route&gt;(route: R, ...args: Args&lt;R&gt;): Promise&lt;ApiContract[R]['response']&gt; {
+    const [method, path] = route.split(' ') as [string, string]                    // 'GET /stock' → ['GET', '/stock']; форма ключа гарантирована типом
+    const opts = ((args as [Opts&lt;R&gt;?])[0] ?? {}) as { query?: Record&lt;string, string | undefined&gt;; body?: unknown }   // внутри generic-функции Args&lt;R&gt; не разрешён — читаем как «возможно один элемент»
+    const qs = opts.query
+      ? '?' + new URLSearchParams(Object.entries(opts.query).filter((e): e is [string, string] =&gt; e[1] !== undefined))
+      : ''
+    const res = await fetchImpl(`${baseUrl}${path}${qs}`, {
+      method,
+      headers: { 'content-type': 'application/json' },
+      body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
+    })
+    if (!res.ok &amp;&amp; res.status !== 422) throw new Error(`${route} → HTTP ${res.status}`)   // 422 — бизнес-отказ в теле (Result), не исключение
+    return (await res.json()) as ApiContract[R]['response']
+  }
+}</code></pre>
+<pre><code>// packages/core/src/api/client.test.ts — типы клиента + вызов с поддельным fetch
+import { it, expect, expectTypeOf, vi } from 'vitest'
+import { createClient } from './client.js'
+import type { StockRow } from '../api-contract.js'
+
+it('routes are typed end to end', async () =&gt; {
+  const fetchImpl = vi.fn(async () =&gt; new Response(JSON.stringify([{ itemId: 'b6', location: 'A1', quantity: 3 }]), { status: 200 }))
+  const api = createClient('http://x', fetchImpl as unknown as typeof fetch)
+
+  const rows = await api('GET /stock', { query: { location: 'A1' } })
+  expectTypeOf(rows).toEqualTypeOf&lt;StockRow[]&gt;()
+  expect(fetchImpl).toHaveBeenCalledWith('http://x/stock?location=A1', expect.objectContaining({ method: 'GET' }))
+
+  const noArgs = api('GET /items')                                                  // ✔ без опций
+  expectTypeOf(noArgs).resolves.toEqualTypeOf&lt;import('../index.js').Item[]&gt;()
+  // @ts-expect-error — POST /movements требует body
+  api('POST /movements')
+  // @ts-expect-error — такого маршрута нет
+  api('GET /nope')
+})</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>19 passed. В IDE: <code>api('</code> — автодополнение четырёх маршрутов; после выбора <code>'POST /movements'</code> второй аргумент подсвечен как обязательный с полем <code>body: MovementInput</code>.</p></div>
+<div class="why"><b>Зачем:</b> <b>Контракт как тип</b>: <code>ApiContract</code> — карта «маршрут → форма запроса и ответа», и обе стороны зависят от неё. <b>Три механизма раздела 4 в одной функции</b>: indexed access <code>ApiContract[R]['response']</code> — тип ответа по маршруту; <code>Omit</code> — опции без ответа; conditional <code>{} extends Opts&lt;R&gt; ? … : …</code> — обязателен ли второй аргумент. Именованные кортежи в <code>...args</code> дают читаемые подписи. <b>Два честных каста</b> с комментариями: форма ключа маршрута и ответ <code>res.json()</code> (<code>any</code> в lib.dom — та же история, что с <code>JSON.parse</code>). Ответ сервера здесь <i>доверяется</i>; для чужого API его тоже стоило бы прогнать через Zod — упражнение.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>422</code> не бросает, а возвращает тело? Как тип <code>Result</code> в контракте связан с этим решением?</li><li>Добавьте маршрут <code>'DELETE /items/:id'</code> с <code>params: { id: string }</code>. Что нужно изменить в <code>createClient</code>, чтобы подставлять параметры в путь, и как типизировать <code>params</code> через template literal type из ключа?</li></ul></div>
+</div></div>
+<div class="step" id="step-5-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-5-2"></label><span class="num">Шаг 5.2</span>Express, реализующий контракт: Response&lt;ApiContract[R]['response']&gt;<a class="anchor" href="#step-5-2">#</a></span><div class="step-body">
+<pre><code>mkdir -p packages/api/src</code></pre>
+<pre><code>// packages/api/package.json
+{
+  "name": "@warehouse/api", "version": "0.0.0", "type": "module",
+  "scripts": { "dev": "tsx watch src/server.ts" },
+  "dependencies": { "@warehouse/core": "*", "express": "^5.0", "zod": "^3.23" },
+  "devDependencies": { "@types/express": "^5.0" }
+}
+// packages/api/tsconfig.json
+{ "extends": "../../tsconfig.base.json", "include": ["src"] }
+// корень: typecheck += &amp;&amp; tsc --noEmit -p packages/api</code></pre>
+<pre><code>// packages/api/src/server.ts
+import express, { type Request, type Response } from 'express'
+import { Warehouse, JsonFileRepository, ItemSchema, MovementInputSchema, toMovement, itemId,
+         type ApiContract, type Item, type Movement, type Stock, type StockRow } from '@warehouse/core'
+
+type Res&lt;R extends keyof ApiContract&gt; = Response&lt;ApiContract[R]['response']&gt;    // res.json() проверяет тело по контракту
+
+const isItem = (x: unknown): x is Item =&gt; ItemSchema.safeParse(x).success
+const isMovement = (x: unknown): x is Movement =&gt; MovementInputSchema.safeParse(x).success &amp;&amp; typeof x === 'object' &amp;&amp; x !== null &amp;&amp; 'id' in x
+const wh = new Warehouse({
+  items:     new JsonFileRepository&lt;Item&gt;('data/items.json', isItem),
+  movements: new JsonFileRepository&lt;Movement&gt;('data/movements.json', isMovement),
+})
+
+function rows(stock: Stock, location?: string): StockRow[] {
+  return Object.entries(stock).flatMap(([key, quantity]) =&gt; {
+    const [item = '', loc = ''] = key.split('@')
+    return location &amp;&amp; loc !== location ? [] : [{ itemId: item, location: loc, quantity }]
+  })
+}
+
+const app = express()
+app.use(express.json())
+
+app.get('/items',     (_req, res: Res&lt;'GET /items'&gt;)     =&gt; { res.json([...wh.items()]) })
+app.get('/movements', (_req, res: Res&lt;'GET /movements'&gt;) =&gt; { res.json([...wh.movements()]) })
+
+app.get('/stock', (req: Request&lt;{}, unknown, unknown, NonNullable&lt;ApiContract['GET /stock']['query']&gt;&gt;, res: Res&lt;'GET /stock'&gt;) =&gt; {
+  res.json(rows(wh.snapshot(), req.query.location))
+})
+
+app.post('/movements', (req, res: Res&lt;'POST /movements'&gt;) =&gt; {
+  const parsed = MovementInputSchema.safeParse(req.body)                          // req.body: any → граница
+  if (!parsed.success) {
+    res.status(400).json({ ok: false, error: { code: 'VALIDATION', issues: parsed.error.issues.map(i =&gt; `${i.path.join('.')}: ${i.message}`) } })
+    return
+  }
+  const r = wh.apply(toMovement(parsed.data))
+  if (r.ok) res.json({ ok: true, value: rows(r.value) })
+  else res.status(422).json(r)                    // r сужен до { ok: false; error: StockError | UNKNOWN_ITEM } — присваивается в ApplyError: бренды снимаются структурно
+})
+
+app.listen(3000, () =&gt; console.log('api: http://localhost:3000'))</code></pre>
+<pre><code>// packages/core/src/warehouse.ts — ещё один геттер
+movements(): readonly Movement[] { return this.deps.movements.list() }</code></pre>
+<pre><code>docker compose exec dev npm install
+docker compose exec dev npm run typecheck
+docker compose exec -d dev npm run -w @warehouse/api dev            # в фоне
+curl -s localhost:3000/stock | jq
+curl -s -X POST localhost:3000/movements -H 'content-type: application/json' -d '{"kind":"out","itemId":"b6","from":"A1","qty":1000,"reason":"sale"}' | jq
+curl -s -X POST localhost:3000/movements -H 'content-type: application/json' -d '{"kind":"out","itemId":"b6","from":"A1","qty":1,"reason":"gift"}' | jq</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>[ { "itemId": "b6", "location": "A1", "quantity": 85 }, … ]
+{ "ok": false, "error": { "code": "INSUFFICIENT", "itemId": "b6", "location": "A1", "have": 85, "need": 1000 } }     ← 422
+{ "ok": false, "error": { "code": "VALIDATION", "issues": [ "reason: Invalid enum value…" ] } }                  ← 400</pre><p>Эксперимент: в <code>GET /items</code> верните <code>res.json({ items: [...] })</code> — <code>typecheck</code> упадёт: тело не соответствует <code>Item[]</code> из контракта. Это и есть «сервер не может нарушить контракт».</p></div>
+<div class="why"><b>Зачем:</b> <b><code>Response&lt;T&gt;</code> из <code>@types/express</code></b> — generic, который проверяет аргумент <code>res.json()</code>. Подставив туда тип из <code>ApiContract</code>, вы связали сервер с контрактом: любое расхождение — ошибка компиляции. <b><code>req.body</code> — <code>any</code></b> в типах Express (историческое), поэтому Zod — сразу. <b>Express + core</b>: сервер — 40 строк, вся логика в <code>Warehouse</code>, которая уже покрыта тестами; тот же экземпляр домена, что в CLI, с теми же JSON-файлами.</div>
+<details class="deep"><summary>🔬 Под капотом: res.json(r): бренды снимаются сами — асимметрия branded types</summary><div class="deep-body">
+
+<p><code>r.error</code> — union, часть вариантов с полем <code>itemId: ItemId</code> (branded), а контракт обещает <code>itemId: string</code>. Структурно <code>ItemId</code> — это <code>string &amp; {…}</code>, он <i>присваивается</i> в <code>string</code>, поэтому <code>res.json(r)</code> проходит без каста: <code>Debrand&lt;StockError&gt;</code> в контракте — ровно то, во что сворачивается <code>StockError</code>. Обратное направление (string → ItemId) без конструктора не пройдёт. Эта асимметрия — вся суть branded types: внутрь только через дверь, наружу свободно.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>GET /stock</code> пришлось аннотировать <code>Request&lt;…&gt;</code> с четырьмя параметрами, а <code>POST /movements</code> — нет?</li><li>Сделайте <code>declare module 'express-serve-static-core' { interface Request { requestId: string } }</code> + middleware, который его ставит. Где положить декларацию, чтобы она подхватилась?</li></ul></div>
+</div></div>
+<div class="step" id="step-5-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-5-3"></label><span class="num">Шаг 5.3</span>Vue 3 + TS: typed props/emits, store на контракте, vue-tsc<a class="anchor" href="#step-5-3">#</a></span><div class="step-body">
+<pre><code>docker run --rm -it -v "$PWD":/app -w /app/packages node:22 npm create vue@latest web -- --ts --pinia
+# затем в packages/web/package.json: "dependencies" += "@warehouse/core": "*"; в корне: npm install</code></pre>
+<pre><code>// packages/web/vite.config.ts — proxy /api → сервер (префикс срезаем)
+server: { host: true, port: 5173, proxy: { '/api': { target: 'http://localhost:3000', rewrite: p =&gt; p.replace(/^\/api/, '') } } },</code></pre>
+<pre><code>// packages/web/src/stores/stock.ts
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { createClient, explainApplyError, type MovementInput, type StockRow } from '@warehouse/core'
+
+const api = createClient('/api')
+
+export const useStockStore = defineStore('stock', () =&gt; {
+  const rows = ref&lt;StockRow[]&gt;([])                      // generic у ref: тип элементов задан явно; ref([]) дал бы never[]
+  const error = ref&lt;string | null&gt;(null)
+  const loading = ref(false)
+
+  async function load(location?: string) {
+    loading.value = true
+    try { rows.value = await api('GET /stock', { query: { location } }) }   // тип ответа — из контракта
+    finally { loading.value = false }
+  }
+
+  async function apply(input: MovementInput): Promise&lt;boolean&gt; {
+    const r = await api('POST /movements', { body: input })
+    if (r.ok) { rows.value = r.value; error.value = null }
+    else error.value = explainApplyError(r.error)      // exhaustive-функция из core — та же, что в CLI
+    return r.ok
+  }
+
+  return { rows, error, loading, load, apply }
+})</code></pre>
+<pre><code>&lt;!-- packages/web/src/components/StockTable.vue --&gt;
+&lt;script setup lang="ts"&gt;
+import type { StockRow } from '@warehouse/core'
+
+const props = defineProps&lt;{                              // generic-синтаксис: тип props — обычный TS-тип
+  rows: readonly StockRow[]
+  highlight?: string
+}&gt;()
+const emit = defineEmits&lt;{                                // события и их аргументы — кортежем
+  select: [itemId: string]
+}&gt;()
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;table&gt;
+    &lt;thead&gt;&lt;tr&gt;&lt;th&gt;Товар&lt;/th&gt;&lt;th&gt;Склад&lt;/th&gt;&lt;th&gt;Остаток&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+    &lt;tbody&gt;
+      &lt;tr v-for="r in rows" :key="`${r.itemId}@${r.location}`" :class="{ hl: r.itemId === highlight }" @click="emit('select', r.itemId)"&gt;
+        &lt;td&gt;{{ r.itemId }}&lt;/td&gt;&lt;td&gt;{{ r.location }}&lt;/td&gt;&lt;td&gt;{{ r.quantity }}&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr v-if="rows.length === 0"&gt;&lt;td colspan="3"&gt;пусто&lt;/td&gt;&lt;/tr&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+&lt;/template&gt;</code></pre>
+<pre><code>&lt;!-- packages/web/src/components/MovementForm.vue --&gt;
+&lt;script setup lang="ts"&gt;
+import { reactive, computed } from 'vue'
+import { OUT_REASONS, type MovementInput } from '@warehouse/core'
+
+const emit = defineEmits&lt;{ submit: [input: MovementInput] }&gt;()
+
+type Kind = MovementInput['kind']
+const KINDS: readonly Kind[] = ['in', 'out', 'transfer', 'adjust']
+
+const form = reactive({ kind: 'in' as Kind, itemId: '', from: '', to: '', location: '', qty: 1, unitCost: 0, reason: 'sale' as (typeof OUT_REASONS)[number], adjustReason: '' })
+
+/** Из плоской формы — в размеченное объединение: switch по kind собирает нужный вариант. */
+const input = computed&lt;MovementInput&gt;(() =&gt; {
+  switch (form.kind) {
+    case 'in':       return { kind: 'in',       itemId: form.itemId, to: form.to, qty: form.qty, unitCost: form.unitCost }
+    case 'out':      return { kind: 'out',      itemId: form.itemId, from: form.from, qty: form.qty, reason: form.reason }
+    case 'transfer': return { kind: 'transfer', itemId: form.itemId, from: form.from, to: form.to, qty: form.qty }
+    case 'adjust':   return { kind: 'adjust',   itemId: form.itemId, location: form.location, qty: form.qty, reason: form.adjustReason }
+  }
+})
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;form class="mf" @submit.prevent="emit('submit', input)"&gt;
+    &lt;select v-model="form.kind"&gt;&lt;option v-for="k in KINDS" :key="k" :value="k"&gt;{{ k }}&lt;/option&gt;&lt;/select&gt;
+    &lt;input v-model.trim="form.itemId" placeholder="товар (id)" required /&gt;
+    &lt;input v-if="form.kind === 'out' || form.kind === 'transfer'" v-model.trim="form.from" placeholder="откуда" required /&gt;
+    &lt;input v-if="form.kind === 'in' || form.kind === 'transfer'"  v-model.trim="form.to"   placeholder="куда" required /&gt;
+    &lt;input v-if="form.kind === 'adjust'" v-model.trim="form.location" placeholder="склад" required /&gt;
+    &lt;input v-model.number="form.qty" type="number" placeholder="кол-во" /&gt;
+    &lt;input v-if="form.kind === 'in'" v-model.number="form.unitCost" type="number" step="0.01" placeholder="цена" /&gt;
+    &lt;select v-if="form.kind === 'out'" v-model="form.reason"&gt;&lt;option v-for="r in OUT_REASONS" :key="r" :value="r"&gt;{{ r }}&lt;/option&gt;&lt;/select&gt;
+    &lt;input v-if="form.kind === 'adjust'" v-model.trim="form.adjustReason" placeholder="причина" required /&gt;
+    &lt;button&gt;Применить&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/template&gt;</code></pre>
+<pre><code>&lt;!-- packages/web/src/App.vue --&gt;
+&lt;script setup lang="ts"&gt;
+import { onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useStockStore } from './stores/stock'
+import StockTable from './components/StockTable.vue'
+import MovementForm from './components/MovementForm.vue'
+import type { MovementInput } from '@warehouse/core'
+
+const store = useStockStore()
+const { rows, error, loading } = storeToRefs(store)
+const selected = ref&lt;string&gt;()                                 // Ref&lt;string | undefined&gt;
+
+onMounted(() =&gt; store.load())
+async function onSubmit(input: MovementInput) { await store.apply(input) }   // input уже MovementInput — из emit
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;main&gt;
+    &lt;h1&gt;Склад &lt;small v-if="loading"&gt;…&lt;/small&gt;&lt;/h1&gt;
+    &lt;MovementForm @submit="onSubmit" /&gt;
+    &lt;p v-if="error" class="err"&gt;{{ error }}&lt;/p&gt;
+    &lt;StockTable :rows="rows" :highlight="selected" @select="id =&gt; (selected = id)" /&gt;
+  &lt;/main&gt;
+&lt;/template&gt;</code></pre>
+<pre><code>docker compose exec -d dev npm run -w web dev -- --host
+# http://localhost:5173 — таблица из API; отправьте out на 1000 — красная строка «на складе A1 только …»
+docker compose exec dev npm run -w web type-check                 # vue-tsc --build</code></pre>
+<p>Три намеренные ошибки — по одной, с запуском <code>type-check</code>:</p><pre><code>&lt;StockTable :rows="'oops'" /&gt;                                       &lt;!-- ✖ Type 'string' is not assignable to type 'readonly StockRow[]' --&gt;
+&lt;StockTable :rows="rows" @select="(id: number) =&gt; …" /&gt;             &lt;!-- ✖ аргумент события — string --&gt;
+&lt;!-- в MovementForm: в ветке 'in' убрать unitCost --&gt;                &lt;!-- ✖ Property 'unitCost' is missing in type … --&gt;</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Страница работает: форма меняет поля по <code>kind</code>, ошибки домена приходят текстом из <code>explainApplyError</code> — той же функции, что печатает CLI. <code>vue-tsc</code> ловит все три ошибки — в шаблоне тоже. Полный <code>npm run typecheck</code> (core, cli, api) + <code>type-check</code> web — зелёные.</p></div>
+<div class="why"><b>Зачем:</b> <b>Один тип — четыре потребителя.</b> <code>MovementInput</code> выведен из Zod-схемы в <code>core</code>; его используют CLI (CSV), API (тело запроса), клиент (аргумент <code>request</code>) и Vue-форма (<code>emit</code> и <code>computed&lt;MovementInput&gt;</code>). Поменяете схему — упадут все четыре места сразу, а не в проде. <b>Vue + TS</b>: <code>defineProps&lt;{…}&gt;()</code> и <code>defineEmits&lt;{…}&gt;()</code> — generic-синтаксис, где типы — обычный TS; <code>ref&lt;StockRow[]&gt;([])</code> — generic-параметр, потому что из <code>[]</code> вывести нечего; <code>computed&lt;MovementInput&gt;</code> с <code>switch</code> — сборка размеченного объединения из плоской формы, компилятор проверяет каждую ветку. <b><code>vue-tsc</code></b> проверяет и шаблоны: типы props при использовании компонента, аргументы событий.</div>
+<details class="deep"><summary>🔬 Под капотом: почему form — плоский объект, а не MovementInput</summary><div class="deep-body">
+
+<p><code>v-model</code> привязывает поле к конкретному пути; форма с переключаемым <code>kind</code> удобнее как «суперпозиция всех полей», из которой <code>computed</code> собирает валидный вариант. Альтернатива — <code>reactive&lt;MovementInput&gt;</code> и при смене kind пересоздавать объект — типобезопаснее, но неудобнее для v-model. Такое расхождение «форма UI ≠ доменный тип» нормально; важно, что переход между ними — в одном месте (<code>computed</code>) и проверяется компилятором.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Что выведет курсор на <code>id</code> в <code>@select="id =&gt; …"</code> в <code>App.vue</code>? Откуда Vue знает тип?</li><li>Добавьте в контракт поле <code>total</code> в <code>StockRow</code>. Перечислите все места, где упадёт компиляция, и в каком порядке вы их почините.</li></ul></div>
+</div></div>
+<div class="step" id="step-5-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-5-4"></label><span class="num">Шаг 5.4</span>Финал: полный typecheck, карта проекта, «до / после»<a class="anchor" href="#step-5-4">#</a></span><div class="step-body">
+<pre><code>// корень package.json — итоговые скрипты
+"typecheck": "tsc --noEmit -p packages/core &amp;&amp; tsc --noEmit -p packages/cli &amp;&amp; tsc --noEmit -p packages/api &amp;&amp; npm run -w web type-check &amp;&amp; echo OK",
+"test": "vitest run",
+"build": "npm run -w @warehouse/cli build &amp;&amp; npm run -w web build"</code></pre>
+<pre><code>docker compose exec dev npm run typecheck &amp;&amp; docker compose exec dev npm test &amp;&amp; docker compose exec dev npm run build</code></pre>
+<pre>packages/core/src/
+├── domain/   ids (Brand, unique symbol) · item/location (interface, as const → Unit) · movement (union, assertNever, MovementOf)
+│             stock (Result, StockError, template literal key, Readonly) · guards (predicates, asserts) · dto (Omit/Partial/Pick/satisfies)
+├── lib/      result · repository&lt;T&gt; · json-repository (override, filter(guard)) · typed-emitter (mapped + generic methods) · group-by
+├── schemas/  Zod: MovementInputSchema, ItemSchema, z.infer · to-domain (граница string → branded)
+├── warehouse.ts   сервис: DI-объект, DistributiveOmit, события
+├── api-contract.ts   ApiContract, StockRow, ApplyError, explainApplyError
+└── api/client.ts     request&lt;R&gt;: indexed access + Omit + conditional tuple
+packages/cli/   parseArgs (ReturnType) · COMMANDS → CommandName (template literal + mapped) · handlers satisfies Record · CliError · vendor/table.d.ts · globals.d.ts · esbuild
+packages/api/   Express: Response&lt;ApiContract[R]['response']&gt;, Zod на req.body
+packages/web/   Vue: defineProps&lt;T&gt;/defineEmits&lt;T&gt;, ref&lt;T&gt;, computed&lt;T&gt;, store по контракту, vue-tsc
+tests/          19 vitest-тестов, из них ~10 содержат expectTypeOf / @ts-expect-error</pre>
+<table>
+<tr><th></th><th>JS (раздел 1)</th><th>Сейчас</th></tr>
+<tr><td>Когда обнаруживается ошибка</td><td>в рантайме, у пользователя</td><td>при наборе (IDE) или в <code>typecheck</code></td></tr>
+<tr><td>Невозможные состояния</td><td>выразимы: «приход с from», «успех с ошибкой»</td><td>невыразимы: union + Result + branded</td></tr>
+<tr><td>Внешние данные</td><td>доверяем</td><td><code>unknown</code> → Zod → доверенный тип; бренды — через конструкторы</td></tr>
+<tr><td>Новый вариант / команда / маршрут</td><td>искать все места руками</td><td><code>assertNever</code>, <code>satisfies Record</code>, контракт — компилятор перечислит места</td></tr>
+<tr><td>Документация</td><td>комментарии, устаревают</td><td>типы, проверяются; подсказки в IDE</td></tr>
+<tr><td>Сервер ↔ клиент</td><td>договорённость на словах</td><td>один <code>ApiContract</code>, обе стороны компилируются против него</td></tr>
+<tr><td>Что стало хуже</td><td colspan="2">больше символов на строку; generics читаются с усилием; сообщения об ошибках в глубоких типах длинные; сборка — отдельная забота (tsx/esbuild/vue-tsc); соблазн <code>as</code> и <code>any</code> «чтобы уже скомпилировалось». Честная цена</td></tr>
+</table>
+<div class="why"><b>Зачем:</b> TypeScript не ловит логические ошибки и не делает программу правильной. Он делает <i>формы данных</i> проверяемыми — и, если формы спроектированы точно (union, Result, branded, контракт), большой класс багов исчезает до запуска. Умение сказать «здесь достаточно <code>string</code>» и «здесь нужен branded с конструктором» — и есть владение TS; количество generics в коде — нет.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Найдите в проекте все <code>as</code> и <code>!</code>. Для каждого — одна фраза «почему здесь оправдано» или замена.</li><li>Какие три типа из проекта вы бы взяли в любой следующий TS-проект без изменений? Какие три оказались лишними?</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 5</span><ul>
+<li>✅ <code>git commit -am "session 5: api + web, end-to-end types"</code></li>
+<li>📝 Ответы 5.1–5.4. Раздел 12 — письменно.</li>
+</ul></div>
+
+<h2 id="sec-10"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-10"></label>10. Чек-лист: концепция ↔ где она в коде <a class="anchor" href="#sec-10">#</a></h2>
+
+<table>
+<tr><th>Концепция</th><th>Где в коде</th><th>Одна фраза</th></tr>
+<tr><td>Аннотации и вывод</td><td>01_basics: параметры аннотированы, остальное выведено</td><td>входы — явно, локальное — вывод</td></tr>
+<tr><td>Литералы, union, <code>as const</code></td><td>UNITS/Unit, OUT_REASONS/OutReason, COMMANDS/CommandName</td><td>значение → тип, один источник</td></tr>
+<tr><td>type vs interface</td><td>Entity/Item — interface; Movement, Result, StockError — type</td><td>объекты-контракты vs union/утилиты</td></tr>
+<tr><td>Структурная типизация, excess property</td><td>02_unions, Repository.list(where)</td><td>форма, а не имя</td></tr>
+<tr><td>unknown / any / never / void</td><td>03_functions; catch (e); assertNever; JSON.parse</td><td>unknown на входе, never для «невозможно»</td></tr>
+<tr><td>strict, noUncheckedIndexedAccess, <code>?.</code>/<code>??</code>/<code>!</code></td><td>04_strict, stock[key] ?? 0, positionals[0]</td><td>честность про undefined</td></tr>
+<tr><td>Branded types, unique symbol, Debrand</td><td>domain/ids.ts</td><td>номинальность поверх примитивов; снятие на границе</td></tr>
+<tr><td>Размеченное объединение + exhaustive switch</td><td>Movement/describe/deltas, StockError/explain, handlers, explainApplyError</td><td>невозможные состояния невыразимы; assertNever</td></tr>
+<tr><td>Result вместо исключений</td><td>lib/result.ts, applyMovement, Warehouse.apply, ApiContract</td><td>отказ — в сигнатуре</td></tr>
+<tr><td>Type predicates, assertion functions, filter(guard)</td><td>guards.ts, isCommandName, isUnit, JsonFileRepository.load</td><td>рантайм-проверка, которой верит компилятор</td></tr>
+<tr><td>Generics: функции, классы, ограничения</td><td>first/byId, Repository&lt;T extends Entity&gt;, TypedEmitter&lt;Events&gt;, need&lt;K&gt;, request&lt;R&gt;</td><td>тип входа сохраняется на выходе</td></tr>
+<tr><td>keyof / typeof / indexed access</td><td>T['id'], Events[K], ApiContract[R]['response'], (typeof UNITS)[number]</td><td>типы из типов и из значений</td></tr>
+<tr><td>Утилиты: Partial/Omit/Pick/Readonly/Record/Extract/ReturnType/NonNullable</td><td>dto.ts, Repository.list, MovementOf, CliValues, need()</td><td>производные без копий</td></tr>
+<tr><td>Mapped types</td><td>TypedEmitter.listeners, Totals, CommandName, Debrand</td><td>по ключам построить новый тип</td></tr>
+<tr><td>Conditional types, infer, распределение</td><td>DistributiveOmit, Debrand, Args&lt;R&gt;, Extract</td><td>if-then на типах; T extends unknown ? … для union</td></tr>
+<tr><td>Template literal types</td><td>StockKey, CommandName</td><td>строки заданной формы</td></tr>
+<tr><td>satisfies</td><td>config.ts, totalsByKind, handlers</td><td>проверить, сохранив выведенный тип; полнота Record</td></tr>
+<tr><td>readonly / Readonly / readonly T[]</td><td>Movement, Stock, list(): readonly T[]</td><td>защита от мутаций на уровне типа</td></tr>
+<tr><td>Классы: abstract/override/параметры-свойства</td><td>InMemoryRepository → JsonFileRepository, CliError</td><td>как в ООП-лабе + override</td></tr>
+<tr><td>DI через интерфейсы</td><td>WarehouseDeps: Repository, now, nextId; createClient(fetchImpl)</td><td>подмена в тестах без моков</td></tr>
+<tr><td>Zod: схема = валидация + тип</td><td>schemas/*, z.infer, z.coerce, z.enum(as const), safeParse</td><td>граница закрыта декларативно</td></tr>
+<tr><td>.d.ts, declare module/global, merging</td><td>vendor/table.d.ts, globals.d.ts, ProcessEnv</td><td>типы для кода без типов</td></tr>
+<tr><td>Node-типы: parseArgs, ReturnType</td><td>args.ts</td><td>тип из конфига</td></tr>
+<tr><td>Тесты на типы: expectTypeOf, @ts-expect-error</td><td>везде в *.test.ts</td><td>контракт зафиксирован</td></tr>
+<tr><td>Инструменты: tsc --noEmit, tsx, esbuild, vue-tsc, workspaces</td><td>package.json, 4.4, 5.3</td><td>проверка ≠ сборка</td></tr>
+<tr><td>Сквозной контракт API</td><td>api-contract.ts, client.ts, server.ts, stores/stock.ts</td><td>один тип — четыре потребителя</td></tr>
+<tr><td>Vue + TS</td><td>defineProps&lt;T&gt;, defineEmits&lt;T&gt;, ref&lt;T&gt;, computed&lt;T&gt;</td><td>generic-синтаксис компонентов</td></tr>
+</table>
+
+<h2 id="sec-11"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-11"></label>11. Глоссарий <a class="anchor" href="#sec-11">#</a></h2>
+<div class="glossary-item" id="g-0"><b>Аннотация типа</b> — <code>x: T</code> — явное указание типа; альтернатива — вывод из значения.</div>
+<div class="glossary-item" id="g-1"><b>Вывод типов (inference)</b> — компилятор определяет тип по значению, возврату, контексту (колбэки).</div>
+<div class="glossary-item" id="g-2"><b>Стирание типов</b> — типы существуют только при компиляции; в JS их нет — отсюда необходимость проверок на границах.</div>
+<div class="glossary-item" id="g-3"><b>Структурная типизация</b> — совместимость по форме, а не по имени типа.</div>
+<div class="glossary-item" id="g-4"><b>Excess property check</b> — литерал объекта прямо в аннотации не может содержать лишних полей; переменная — может.</div>
+<div class="glossary-item" id="g-5"><b>Union / пересечение</b> — <code>A | B</code> — одно из; <code>A &amp; B</code> — всё вместе.</div>
+<div class="glossary-item" id="g-6"><b>Литеральный тип</b> — конкретное значение как тип: <code>'in'</code>, <code>42</code>, <code>true</code>.</div>
+<div class="glossary-item" id="g-7"><b><code>as const</code></b> — сделать литерал readonly с сохранением литеральных типов; источник для типов через <code>typeof</code>.</div>
+<div class="glossary-item" id="g-8"><b>Размеченное объединение</b> — union объектов с общим полем-дискриминантом (<code>kind</code>, <code>code</code>, <code>ok</code>); сужается через switch/if.</div>
+<div class="glossary-item" id="g-9"><b>Сужение (narrowing)</b> — уточнение типа переменной внутри условия: typeof, instanceof, in, равенство, predicates.</div>
+<div class="glossary-item" id="g-10"><b>Type predicate</b> — функция <code>(x): x is T</code>; true ⇒ TS считает x типом T.</div>
+<div class="glossary-item" id="g-11"><b>Assertion function</b> — функция <code>(x): asserts x is T</code>; после вызова x сужен, иначе — исключение.</div>
+<div class="glossary-item" id="g-12"><b>Exhaustiveness</b> — проверка полноты разбора вариантов через <code>never</code> (<code>assertNever</code>) или <code>satisfies Record&lt;Union, …&gt;</code>.</div>
+<div class="glossary-item" id="g-13"><b><code>unknown</code></b> — что угодно, но использовать нельзя без сужения. Тип всего внешнего.</div>
+<div class="glossary-item" id="g-14"><b><code>any</code></b> — отключение проверки. Не использовать.</div>
+<div class="glossary-item" id="g-15"><b><code>never</code></b> — тип без значений: «сюда не попадём», результат исчерпания union.</div>
+<div class="glossary-item" id="g-16"><b>Branded type</b> — примитив с фантомной меткой в типе — номинальность; создаётся только конструктором.</div>
+<div class="glossary-item" id="g-17"><b>Result</b> — union «успех с value | ошибка с error»; отказ виден в сигнатуре.</div>
+<div class="glossary-item" id="g-18"><b>Generic</b> — параметр типа: функция/класс/тип, работающие с любым T, сохраняя его.</div>
+<div class="glossary-item" id="g-19"><b>Ограничение (<code>extends</code>)</b> — <code>T extends Entity</code> — T обязан иметь форму; внутри доступны её поля.</div>
+<div class="glossary-item" id="g-20"><b><code>keyof</code> / <code>typeof</code> / <code>T[K]</code></b> — ключи типа / тип значения / тип поля (indexed access).</div>
+<div class="glossary-item" id="g-21"><b>Mapped type</b> — <code>{ [K in keyof T]: … }</code> — новый тип по ключам существующего; основа Partial, Readonly, Record.</div>
+<div class="glossary-item" id="g-22"><b>Conditional type</b> — <code>A extends B ? X : Y</code>; распределяется по union, если A — голый параметр; <code>infer</code> вытаскивает часть.</div>
+<div class="glossary-item" id="g-23"><b>Template literal type</b> — строковый тип заданной формы: <code>`${G}:${A}`</code>.</div>
+<div class="glossary-item" id="g-24"><b><code>satisfies</code></b> — проверить соответствие типу, сохранив точный выведенный тип значения.</div>
+<div class="glossary-item" id="g-25"><b><code>as</code></b> — утверждение типа: компилятор верит; ответственность на вас.</div>
+<div class="glossary-item" id="g-26"><b>Утилитные типы</b> — Partial, Required, Readonly, Pick, Omit, Record, Extract, Exclude, ReturnType, Parameters, NonNullable, Awaited.</div>
+<div class="glossary-item" id="g-27"><b><code>readonly</code></b> — запрет присваивания поля / мутирующих методов массива на уровне типа.</div>
+<div class="glossary-item" id="g-28"><b>Declaration merging</b> — интерфейсы с одним именем сливаются; способ расширить чужие типы.</div>
+<div class="glossary-item" id="g-29"><b><code>.d.ts</code> / <code>declare</code></b> — файл только с типами; declare — «существует где-то, описываю форму».</div>
+<div class="glossary-item" id="g-30"><b>Zod</b> — библиотека схем: рантайм-валидация + <code>z.infer</code> — тип из схемы.</div>
+<div class="glossary-item" id="g-31"><b><code>strict</code></b> — набор строгих флагов; без него TS — подсказки, а не проверка.</div>
+<div class="glossary-item" id="g-32"><b>tsx / esbuild / tsc</b> — запуск без проверки / сборка без проверки / проверка (и сборка) с типами.</div>
+<div class="glossary-item" id="g-33"><b>Workspaces</b> — несколько пакетов в одном репозитории с общими зависимостями; <code>@warehouse/core</code> импортируется по имени.</div>
+
+<h2 id="sec-12"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-12"></label>12. Вопросы на понимание (и для собеседования) <a class="anchor" href="#sec-12">#</a></h2>
+
+<p>Письменно, со ссылкой на шаг и файл.</p>
+<h3>Основы</h3>
+<ul>
+<li>Что TypeScript ловит, а что нет? По два примера из лабы на каждое.</li>
+<li>Куда деваются типы после компиляции и что из этого следует для JSON, argv и HTTP?</li>
+<li>Когда писать аннотацию, а когда — доверять выводу? Правило и примеры.</li>
+<li>type vs interface: правило выбора и по два примера из проекта.</li>
+<li>Объясните структурную типизацию на примере <code>ItemId</code>/<code>LocationId</code> — и как branded types её обходят.</li>
+<li><code>unknown</code> vs <code>any</code>: что общего, что разное, где каждый допустим.</li>
+<li>Что делает <code>strictNullChecks</code>, и что добавляет <code>noUncheckedIndexedAccess</code>?</li>
+</ul>
+<h3>Union и сужение</h3>
+<ul>
+<li>Что такое дискриминант? Почему <code>{ from?: string; to?: string }</code> хуже, чем union из вариантов?</li>
+<li>Как <code>assertNever</code> превращает пропущенный вариант в ошибку компиляции? Где ещё в проекте есть проверка полноты (не через never)?</li>
+<li>Type predicate vs assertion function: разница, пример каждого.</li>
+<li>Почему <code>Result</code> лучше исключений для ожидаемых отказов и хуже — для неожиданных?</li>
+</ul>
+<h3>Generics и типы-утилиты</h3>
+<ul>
+<li>Когда generic нужен, а когда достаточно <code>unknown</code>? Правило «T встречается один раз».</li>
+<li>Объясните <code>T['id']</code> в <code>Repository</code> и <code>Events[K]</code> в <code>TypedEmitter</code>.</li>
+<li>Напишите <code>Partial</code> руками. Что такое mapped type?</li>
+<li>Почему обычный <code>Omit</code> ломает union, а <code>DistributiveOmit</code> — нет?</li>
+<li>Что делает <code>{} extends Opts&lt;R&gt; ? [opts?] : [opts]</code> в клиенте API?</li>
+<li><code>satisfies</code> vs <code>as</code> vs аннотация — три различия.</li>
+<li>Как из объекта <code>COMMANDS</code> получился тип <code>CommandName</code>? Назовите три механизма по порядку.</li>
+</ul>
+<h3>Границы и инструменты</h3>
+<ul>
+<li>Почему <code>parseMovement</code> руками — плохо масштабируется, и что даёт Zod помимо экономии строк?</li>
+<li>Что такое <code>z.infer</code> и как тест в 4.2 гарантирует совпадение схемы с доменным типом?</li>
+<li>Как типизировать JS-модуль без типов? Три варианта из раздела 5.</li>
+<li>Зачем <code>export {}</code> в <code>globals.d.ts</code>?</li>
+<li>tsx, esbuild, tsc: кто проверяет типы, кто нет, и почему CI — две команды.</li>
+<li>Как один тип <code>MovementInput</code> используется в CLI, API, клиенте и Vue? Что упадёт при изменении схемы?</li>
+</ul>
+<h3>Цена</h3>
+<ul>
+<li>Найдите все <code>as</code> в проекте и классифицируйте: «граница», «компилятор не свернул», «лень». Сколько в каждой категории?</li>
+<li>Для какого проекта TypeScript не нужен? Где в этой лабе типы дали меньше всего пользы?</li>
+</ul>
+
+<h2 id="sec-13"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-13"></label>13. Что дальше <a class="anchor" href="#sec-13">#</a></h2>
+
+<table>
+<tr><th>Тема</th><th>Что это</th><th>Связь с лабой</th><th>Почитать</th></tr>
+<tr><td>Project references, <code>tsc -b</code></td><td>сборка монорепо через <code>composite</code> и <code>dist/</code> у каждого пакета</td><td>замена esbuild-бандла для библиотек; правильные <code>.d.ts</code> на выходе</td><td><a href="https://www.typescriptlang.org/docs/handbook/project-references.html" target="_blank">Handbook: Project References</a></td></tr>
+<tr><td>Zod <code>.brand()</code> / <code>.transform()</code></td><td>бренд и преобразование прямо в схеме</td><td>убрать последний <code>as</code> из <code>JsonFileRepository</code> (4.2, «под капотом»)</td><td><a href="https://zod.dev/" target="_blank">zod.dev</a></td></tr>
+<tr><td>ts-reset, type-fest</td><td>исправленные типы стандартной библиотеки; готовые утилиты (Simplify, SetRequired…)</td><td><code>JSON.parse → unknown</code>, <code>Object.keys</code> честнее</td><td><a href="https://github.com/total-typescript/ts-reset" target="_blank">ts-reset</a></td></tr>
+<tr><td>tRPC / ts-rest / OpenAPI + openapi-typescript</td><td>сквозные контракты API «из коробки»</td><td>ваш <code>ApiContract</code> + <code>createClient</code> — ручная версия того же</td><td><a href="https://trpc.io/" target="_blank">trpc.io</a></td></tr>
+<tr><td>Effect / neverthrow</td><td>библиотеки для <code>Result</code> с <code>map/flatMap/pipe</code></td><td>цепочки Result без <code>if (!r.ok) return r</code></td><td><a href="https://github.com/supermacro/neverthrow" target="_blank">neverthrow</a></td></tr>
+<tr><td>NestJS глазами TS</td><td>декораторы, <code>reflect-metadata</code>, DI по типам конструктора</td><td>теперь понятно, что делает <code>constructor(private auth: AuthService)</code> и почему нужен <code>emitDecoratorMetadata</code></td><td><a href="https://docs.nestjs.com/fundamentals/custom-providers" target="_blank">docs.nestjs.com</a></td></tr>
+<tr><td>Vue Lab на TS</td><td>перевод Helpdesk на <code>lang="ts"</code></td><td>typed store, props, emits, router meta; <code>vue-tsc</code> в CI</td><td>Vue_Lab_Helpdesk.html</td></tr>
+<tr><td>Type challenges</td><td>задачи на типы</td><td>mapped/conditional/infer до автоматизма</td><td><a href="https://github.com/type-challenges/type-challenges" target="_blank">type-challenges</a></td></tr>
+<tr><td>typescript-eslint</td><td>линтер, понимающий типы</td><td><code>no-explicit-any</code>, <code>no-unnecessary-condition</code>, <code>switch-exhaustiveness-check</code></td><td><a href="https://typescript-eslint.io/" target="_blank">typescript-eslint.io</a></td></tr>
+</table>
+
+</main>
+</div>
+<a class="totop" href="#top">↑ Наверх</a>
+<script>
+(function () {
+  var KEY = 'ts-lab-progress', NAVKEY = 'ts-lab-nav';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+  var boxes = document.querySelectorAll('input.done');
+  function apply() {
+    var total = boxes.length, done = 0;
+    boxes.forEach(function (b) {
+      var k = b.dataset.key, on = !!state[k];
+      b.checked = on; if (on) done++;
+      var host = b.closest('.step') || b.closest('h2');
+      if (host) host.classList.toggle('is-done', on);
+      var nav = document.querySelector('.sidebar a[data-key="' + k + '"]');
+      if (nav) nav.classList.toggle('done', on);
+    });
+    document.getElementById('progress-fill').style.width = (total ? done / total * 100 : 0) + '%';
+    document.getElementById('progress-text').textContent = 'Пройдено: ' + done + ' / ' + total;
+  }
+  boxes.forEach(function (b) {
+    b.addEventListener('change', function () {
+      state[b.dataset.key] = b.checked;
+      localStorage.setItem(KEY, JSON.stringify(state));
+      apply();
+    });
+  });
+  document.getElementById('reset-progress').addEventListener('click', function () {
+    if (confirm('Сбросить все отметки?')) { state = {}; localStorage.removeItem(KEY); apply(); }
+  });
+  apply();
+
+  var toggle = document.getElementById('nav-toggle');
+  function setNav(collapsed) {
+    document.body.classList.toggle('nav-collapsed', collapsed);
+    localStorage.setItem(NAVKEY, collapsed ? '1' : '0');
+    toggle.textContent = collapsed ? '☰' : '✕';
+    toggle.title = collapsed ? 'Показать оглавление' : 'Скрыть оглавление';
+  }
+  toggle.addEventListener('click', function () { setNav(!document.body.classList.contains('nav-collapsed')); });
+  setNav(localStorage.getItem(NAVKEY) === '1' || window.innerWidth < 900);
+
+  // клик по чекбоксу в заголовке не должен вести по якорю
+  document.querySelectorAll('.done-label').forEach(function (l) { l.addEventListener('click', function (e) { e.stopPropagation(); }); });
+})();
+</script>
+</body>
+</html>
