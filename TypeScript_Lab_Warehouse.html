@@ -169,7 +169,7 @@
 <main>
 
 <h1>🔷 TypeScript Lab — Warehouse</h1>
-<p class="subtitle">TypeScript с нуля: от аннотаций до generics, сужения типов, mapped/conditional types и валидации на границах — на складском CLI-инструменте, который в конце становится типизированным API с Vue-фронтендом. Стек: TypeScript 5.6 + Node 22 + tsx + Vitest + Zod; в финале Express и Vue 3 + TS.</p>
+<p class="subtitle">TypeScript с нуля: от аннотаций до generics, сужения типов, mapped/conditional types и валидации на границах — на складском CLI-инструменте, который в конце становится типизированным API с Vue-фронтендом. Стек: TypeScript 5.x (≥ 5.6) + Node 22+ (24 LTS тоже подходит) + tsx + Vitest + Zod; в финале Express и Vue 3 + TS.</p>
 
 <div class="toc"><b>Как устроена лаба.</b> Разделы 1–8 — теория: зачем типы, азбука, структурная типизация и сужение, generics и типы-утилиты, границы и валидация, классы, инструменты, архитектура. Раздел 9 — пять сессий: чистый TS в песочнице → домен склада → generics и типизированные абстракции → CLI с парсингом, Zod и .d.ts → сквозная типизация API + Vue. Каждый шаг: код → «зачем» → команда → ожидаемый результат → «проверь себя». Разделы 10–13 — чек-лист, глоссарий, вопросы, что дальше.
 <p class="small">Отдельный репозиторий (npm workspaces: <code>packages/core</code>, <code>cli</code>, <code>api</code>, <code>web</code>). Никаких фреймворков до сессии 5: TypeScript нужно увидеть в чистом виде, чтобы потом узнавать его в Nest и Vue. Node 22 в Docker, как в остальных лабах. Знания JS предполагаются на уровне «писал на нём»; ООП-концепции — из ООП-лабы (ссылки по тексту).</p></div>
@@ -299,6 +299,7 @@ UNITS.includes(x as Unit)                              // список для в
 <p>В лабе — <code>as const</code> + вывод типа: одно значение даёт и рантайм-список, и тип. <code>enum</code> оставляем для чужого кода (в Nest он встречается).</p>
 <h3>2.10 Приведение: as и satisfies</h3>
 <pre><code>const el = document.querySelector('#qty') as HTMLInputElement   // «я знаю лучше»: TS верит; ошибка проявится в рантайме
+interface Config { units: string[]; maxQty: number }
 const cfg = { units: ['pcs', 'kg'], maxQty: 1000 } satisfies Config   // проверить соответствие, НЕ меняя выведенный тип
 cfg.units[0]                                                     // 'pcs' | 'kg' — литералы сохранились (с `: Config` было бы string)</code></pre>
 
@@ -311,8 +312,8 @@ function byId&lt;T extends { id: string }&gt;(list: T[], id: string): T | undefi
 
 <h3>2.12 keyof, typeof, индексный доступ</h3>
 <pre><code>type ItemKey = keyof Item              // 'id' | 'name' | 'minStock' | 'sku'
-type Config = typeof cfg               // тип из значения (typeof в позиции типа — не рантайм-typeof)
-type Unit = Item['unit']               // тип поля
+type ConfigFromValue = typeof cfg      // тип из значения (typeof в позиции типа — не рантайм-typeof)
+type SkuType = Item['sku']             // тип поля
 type FirstUnit = (typeof UNITS)[0]     // 'pcs'</code></pre>
 
 <h3>2.13 Классы</h3>
@@ -403,7 +404,7 @@ assertMovement(raw); describe(raw)        // ✔</code></pre>
 <h3>4.1 Generics — параметризация типом</h3>
 <pre><code>// функция
 function groupBy&lt;T, K extends keyof T&gt;(list: T[], key: K): Map&lt;T[K], T[]&gt; { … }
-groupBy(movements, 'kind')            // Map&lt;'in' | 'out' | 'transfer', Movement[]&gt; — K выведен как 'kind', T[K] — тип поля
+groupBy(movements, 'kind')            // Map&lt;'in' | 'out' | 'transfer' | 'adjust', Movement[]&gt; — K выведен как 'kind', T[K] — тип поля
 
 // тип
 type Result&lt;T, E&gt; = { ok: true; value: T } | { ok: false; error: E }
@@ -455,7 +456,7 @@ type EventName = `${Lowercase&lt;Group&gt;}.${string}`               // 'item.ч
 <h2 id="sec-5"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-5"></label>5. Границы: unknown, Zod, .d.ts и чужой код <a class="anchor" href="#sec-5">#</a></h2>
 
 <p>Типы стираются. Значит, всё, что приходит извне, имеет тип <code>unknown</code> — что бы ни обещала документация. Три границы в лабе:</p>
-<pre>       argv / файл CSV / JSON / HTTP-тело            ←  unknown
+<pre>       argv / файл (CSV/JSON) / HTTP-тело            ←  unknown
                     │
                     ▼  проверка КОДОМ: Zod-схема (или свой type predicate)
               Movement, Item, …                       ←  доверенные типы: дальше компилятор
@@ -465,7 +466,7 @@ type EventName = `${Lowercase&lt;Group&gt;}.${string}`               // 'item.ч
 <pre><code>import { z } from 'zod'
 const MovementSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('in'),  itemId: z.string(), to: z.string(),   qty: z.number().positive(), unitCost: z.number().nonnegative() }),
-  z.object({ kind: z.literal('out'), itemId: z.string(), from: z.string(), qty: z.number().positive(), reason: z.enum(['sale', 'writeoff']) }),
+  z.object({ kind: z.literal('out'), itemId: z.string(), from: z.string(), qty: z.number().positive(), reason: z.enum(['sale', 'writeoff', 'sample']) }),
 ])
 type MovementInput = z.infer&lt;typeof MovementSchema&gt;       // тип ВЫВЕДЕН из схемы — один источник правды для рантайма и компилятора
 
@@ -520,7 +521,7 @@ class JsonRepository&lt;T extends Entity&gt; extends Repository&lt;T&gt; impleme
 └── packages/
     ├── core/                        чистый TS, ноль зависимостей (кроме zod в сессии 4)
     │   └── src/
-    │       ├── playground/          сессия 1: 01–05_*.ts — песочница
+    │       ├── playground/          сессия 1: 01–04_*.ts; 05_ids.ts — сессия 2 — песочница
     │       ├── domain/              ids (branded), item, location, movement (union), stock (apply + Result + errors)
     │       ├── lib/                 result, typed-emitter, repository (interface + InMemory + JsonFile), group-by
     │       ├── warehouse.ts         сервис: репозитории + emitter + apply
@@ -611,7 +612,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({ test: { include: ['packages/**/*.test.ts'] } })</code></pre>
 <pre><code>docker compose up -d
 docker compose exec dev npm install
-docker compose exec dev npm run typecheck        # OK (файлов ещё нет)</code></pre>
+docker compose exec dev npm run typecheck        # error TS18003: No inputs were found (файлов ещё нет — OK появится в шаге 1.2)</code></pre>
 <div class="why"><b>Зачем:</b> Workspaces с первого дня, чтобы в сессии 5 добавить <code>api</code> и <code>web</code>, не перестраивая репозиторий. <code>noEmit</code> в базовом конфиге: <code>tsc</code> у нас — только проверка; запускает <code>tsx</code>, собирает <code>esbuild</code>. <code>@types/node</code> — типы для <code>process</code>, <code>fs</code>, <code>node:util</code>: без них Node-API для TS не существует.</div>
 </div></div>
 <div class="step" id="step-1-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-2"></label><span class="num">Шаг 1.2</span>От JS к TS: аннотации, вывод, ошибки компилятора — <span class="file">playground/01_basics.ts</span><a class="anchor" href="#step-1-2">#</a></span><div class="step-body">
@@ -702,7 +703,7 @@ function area(s: Shape): number {
     case 'box':  return s.w * s.h                                       // s: box — есть w, h
     case 'ball': return Math.PI * s.r ** 2
   }
-  // без default: если добавить вариант в Shape, TS скажет «not all code paths return a value» — тоже защита
+  // без default: если добавить вариант в Shape, TS скажет «TS2366: Function lacks ending return statement» — тоже защита
 }
 console.log(area({ kind: 'box', w: 2, h: 3 }), area({ kind: 'ball', r: 1 }))
 // area({ kind: 'box', r: 1 })               // ✖ TS2353 / TS2322 — смешать варианты нельзя</code></pre>
@@ -1051,7 +1052,7 @@ describe('applyMovement', () =&gt; {
   })
 })</code></pre>
 <div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>4 passed. Наведите курсор на <code>r.error</code> внутри <code>if (r.error.code === 'INSUFFICIENT')</code> — <code>{ code: 'INSUFFICIENT'; itemId; location; have; need }</code>: сужение сработало дважды подряд (Result → ошибка → конкретная ошибка).</p></div>
-<div class="why"><b>Зачем:</b> <b>Ошибки как данные.</b> <code>StockError</code> — тоже размеченное объединение: у каждой ошибки свои поля, и <code>explain()</code> обязан обработать все (нет <code>default</code> — при новом коде компилятор скажет «not all code paths return»). Вызывающий код (CLI, API) сможет по <code>code</code> выбрать exit-код или HTTP-статус без парсинга строк. <b>Иммутабельный <code>Stock</code></b>: <code>Readonly&lt;Record&gt;</code> снаружи, локальная mutable-копия внутри — компилятор не даст <code>stock[key] = …</code> на входном параметре. <b>Template literal type <code>StockKey</code></b>: ключ — не любая строка, а строка вида <code>a@b</code>; <code>stock['oops']</code> — ошибка компиляции.</div>
+<div class="why"><b>Зачем:</b> <b>Ошибки как данные.</b> <code>StockError</code> — тоже размеченное объединение: у каждой ошибки свои поля, и <code>explain()</code> обязан обработать все (нет <code>default</code> — при новом коде компилятор скажет «TS2366: Function lacks ending return statement»). Вызывающий код (CLI, API) сможет по <code>code</code> выбрать exit-код или HTTP-статус без парсинга строк. <b>Иммутабельный <code>Stock</code></b>: <code>Readonly&lt;Record&gt;</code> снаружи, локальная mutable-копия внутри — компилятор не даст <code>stock[key] = …</code> на входном параметре. <b>Template literal type <code>StockKey</code></b>: ключ — не любая строка, а строка вида <code>a@b</code>; <code>stock['oops']</code> — ошибка компиляции.</div>
 <details class="deep"><summary>🔬 Под капотом: почему не исключения: Result vs throw</summary><div class="deep-body">
 
 <p>Исключение не видно в сигнатуре: <code>applyMovement(): Stock</code> ничего не говорит о том, что может упасть, и вызывающий узнает об этом в проде. <code>Result&lt;Stock, StockError&gt;</code> — часть типа, и компилятор заставит проверить. Правило лабы: <b>ожидаемые отказы бизнес-логики — Result; неожиданное (баг, I/O) — throw</b>. Цена Result — многословность (<code>if (!r.ok) return r</code> на каждом шаге); в сессии 3 можно написать <code>map/flatMap</code> для цепочек — упражнение.</p>
@@ -1317,7 +1318,7 @@ export const config = {
 } satisfies WarehouseConfig
 
 config.defaultUnit            // тип: 'pcs' — литерал сохранён (с `: WarehouseConfig` было бы Unit)
-config.locations[0]           // 'A1' | 'A2' | 'B1' | undefined — кортеж литералов, а не string[]
+config.locations[0]           // string | undefined — тип поля остался readonly string[] (для кортежа литералов нужен as const)
 // const bad = { defaultUnit: 'box', lowStockFactor: 1, locations: [] } satisfies WarehouseConfig   // ✖ 'box' не Unit — проверка есть</code></pre>
 <pre><code>// packages/core/src/lib/group-by.test.ts + dto.test.ts — коротко
 import { it, expect, expectTypeOf } from 'vitest'
@@ -1337,7 +1338,7 @@ it('types: DTOs', () =&gt; {
   expectTypeOf(config.defaultUnit).toEqualTypeOf&lt;'pcs'&gt;()
   expect(totalsByKind([])).toEqual({ in: 0, out: 0, transfer: 0, adjust: 0 })
 })</code></pre>
-<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>13 passed. Проверьте вручную: добавьте в <code>Movement</code> пятый kind (как в 2.2) — <code>satisfies Record&lt;MovementKind, number&gt;</code> в <code>totalsByKind</code> даст ошибку «Property 'return' is missing». Уберите.</p></div>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>13 passed. Проверьте вручную: добавьте в <code>Movement</code> пятый kind (как в 2.2) — <code>satisfies Record&lt;MovementKind, number&gt;</code> в <code>totalsByKind</code> даст ошибку «Property '&lt;новый-kind&gt;' is missing in type '{ in: number; out: number; transfer: number; adjust: number; }' but required in type 'Record&lt;MovementKind, number&gt;'». Уберите.</p></div>
 <div class="why"><b>Зачем:</b> <b>Утилиты вместо копий</b>: <code>NewItem</code>, <code>ItemPatch</code>, <code>ItemView</code> выведены из <code>Item</code> — добавите поле в <code>Item</code>, и все производные обновятся. Это DRY на уровне типов. <b><code>satisfies</code></b> — проверка «соответствует ли», сохраняющая точный выведенный тип: конфиг проверен, а литералы <code>'pcs'</code> и кортеж локаций остались. <b><code>groupBy&lt;T, K extends keyof T&gt;</code></b> — generic с двумя параметрами, где второй ограничен первым: ключ проверяется на существование в <code>T</code>, а <code>Record&lt;string, T[]&gt;</code> честно говорит, что ключи результата — строки.</div>
 <details class="deep"><summary>🔬 Под капотом: satisfies vs as vs аннотация — три разных вещи</summary><div class="deep-body">
 
@@ -1474,9 +1475,9 @@ describe('Warehouse', () =&gt; {
 })</code></pre>
 <div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>16 passed. Наведите курсор на параметр <code>apply</code>: <code>DistributiveOmit&lt;Movement, 'id' | 'at'&gt;</code> развернулся в union из четырёх вариантов без <code>id/at</code>, и в тесте <code>{ kind: 'in', … }</code> проверяется по варианту <code>in</code> — попробуйте добавить <code>from</code> в приход.</p></div>
 <div class="why"><b>Зачем:</b> <b>Всё соединилось.</b> Сервис не знает, где хранятся данные (<code>Repository</code> — интерфейс), кто слушает события (<code>TypedEmitter</code>), сколько сейчас времени (<code>now</code>) — те же принципы DI, что в ООП-лабе, только без контейнера: зависимости — объект-литерал. <b><code>DistributiveOmit</code></b> — единственный «умный» тип сессии, и он нужен по делу: обычный <code>Omit&lt;A | B, K&gt;</code> сначала объединяет A и B в общую форму (теряя варианты), потом убирает ключи; распределительный — применяется к каждому варианту. Вы упёрлись в него, значит, поняли раздел 4.3. <b>Ошибка расширена</b>: <code>StockError | { code: 'UNKNOWN_ITEM' }</code> — union ошибок растёт, и <code>explain()</code> в CLI обязан будет обработать новый код.</div>
-<details class="deep"><summary>🔬 Под капотом: as Movement в apply — почему здесь каст оправдан, и как без него</summary><div class="deep-body">
+<details class="deep"><summary>🔬 Под капотом: as Movement в apply — почему здесь каст на самом деле не нужен</summary><div class="deep-body">
 
-<p>После спреда <code>{ ...input, id, at }</code> TS выводит пересечение «union без id/at» &amp; «{ id; at }» — это корректный <code>Movement</code>, но компилятор не всегда умеет свернуть такое обратно в union. Каст <code>as Movement</code> — честное «я знаю, что это тот же union». Без каста: <code>switch (input.kind)</code> с четырьмя ветками, в каждой — свой объект. Многословно, зато без <code>as</code>. Выбор — ваш; в лабе каст с комментарием.</p>
+<p>После спреда <code>{ ...input, id, at }</code> компилятор на самом деле корректно сворачивает результат обратно в union <code>Movement</code> — проверьте: уберите <code>as Movement</code>, и присваивание <code>const check: Movement = movement</code> всё равно скомпилируется без ошибок. Каст здесь лишний, а не «оправданный» — он ничего не чинит, просто дублирует то, что TS и так вывел. Оставлен как явная пометка «это тот же union», но без него код короче и работает так же.</p>
 <p><code>(wh as any).deps</code> в тесте — плохой запах: тест лезет в private. Правильно — сделать репозитории в тесте переменными снаружи и передать их обоим Warehouse. Исправьте: это упражнение «проверь себя».</p>
 </div></details>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите <code>as any</code> из третьего теста, переписав <code>makeWarehouse</code> так, чтобы репозитории были доступны. Сколько строк?</li><li>Замените <code>DistributiveOmit</code> на обычный <code>Omit</code>. Прочитайте ошибку в тесте. Какой тип получился и почему в нём нет <code>kind</code> как дискриминанта?</li></ul></div>
@@ -2172,7 +2173,7 @@ docker compose exec dev npm run -w web type-check                 # vue-tsc --bu
 packages/cli/   parseArgs (ReturnType) · COMMANDS → CommandName (template literal + mapped) · handlers satisfies Record · CliError · vendor/table.d.ts · globals.d.ts · esbuild
 packages/api/   Express: Response&lt;ApiContract[R]['response']&gt;, Zod на req.body
 packages/web/   Vue: defineProps&lt;T&gt;/defineEmits&lt;T&gt;, ref&lt;T&gt;, computed&lt;T&gt;, store по контракту, vue-tsc
-tests/          19 vitest-тестов, из них ~10 содержат expectTypeOf / @ts-expect-error</pre>
+Тесты: 19 vitest-тестов рядом с исходниками (*.test.ts), из них ~10 содержат expectTypeOf / @ts-expect-error</pre>
 <table>
 <tr><th></th><th>JS (раздел 1)</th><th>Сейчас</th></tr>
 <tr><td>Когда обнаруживается ошибка</td><td>в рантайме, у пользователя</td><td>при наборе (IDE) или в <code>typecheck</code></td></tr>

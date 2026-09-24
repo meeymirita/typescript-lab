@@ -11,7 +11,7 @@
 
 ## Стек
 
-TypeScript 5.6 + Node 22 + `tsx` + Vitest + Zod, в финале — Express и Vue 3 + TS. Отдельный репозиторий на npm workspaces: `packages/core`, `cli`, `api`, `web`. Всё в Docker.
+TypeScript 5.x (≥ 5.6) + Node 22+ (24 LTS тоже подходит) + `tsx` + Vitest + Zod, в финале — Express и Vue 3 + TS. Отдельный репозиторий на npm workspaces: `packages/core`, `cli`, `api`, `web`. Всё в Docker.
 
 ## Формат
 
