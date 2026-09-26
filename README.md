@@ -29,4 +29,4 @@ TypeScript 5.x (≥ 5.6) + Node 22+ (24 LTS тоже подходит) + `tsx` +
 
 ---
 
-Часть сборного репозитория лабораторных работ — [submodule-group-lab](https://github.com/meeymirita/submodule-group-lab).
+Часть сборного репозитория лабораторных работ — [anitech-performance](https://github.com/meeymirita/anitech-performance).
