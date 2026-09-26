@@ -2,7 +2,7 @@
 
 ![TypeScript](typescript.png)
 
-> **24.09.2026 — методичка вычитана и исправлена.** Что найдено и что поправлено — в [fixes/typescript.md](https://github.com/meeymirita/submodule-group-lab/blob/main/fixes/typescript.md) сборного репозитория.
+> **24.09.2026 — методичка вычитана и исправлена.** Что найдено и что поправлено — в [fixes/typescript.md](https://github.com/meeymirita/lab-fixes/blob/main/typescript.md) репозитория `lab-fixes`.
 
 **Статус: ⚪ методичка готова, прохождение впереди.**
 **Сложность: высокая** — абстрактное мышление на уровне типов (generics, conditional/mapped types) непривычно после динамического PHP. Логично проходить после или параллельно с Vue-лабой (сессия 5 её использует).
