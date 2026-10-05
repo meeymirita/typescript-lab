@@ -1,6 +1,6 @@
 # TypeScript Lab — Warehouse
 
-![TypeScript](https://meeymirita-files.storage.yandexcloud.net/typescript/typescript.png)
+![TypeScript](https://raw.githubusercontent.com/meeymirita/works-lab/main/images/typescript.png)
 
 > **24.09.2026 — методичка вычитана и исправлена.** Что найдено и что поправлено — в [fixes/frontend/typescript.md](https://github.com/meeymirita/lab-fixes/blob/main/frontend/typescript.md) репозитория `lab-fixes`.
 
