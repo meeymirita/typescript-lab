@@ -17,7 +17,7 @@ TypeScript 6.0 (код проверен и на 5.9) + Node 24+ (LTS) + `tsx` + 
 
 ## Формат
 
-Методичка [`TypeScript_Lab_Warehouse.html`](TypeScript_Lab_Warehouse.html) — открывается в браузере. Каждый шаг заканчивается зелёным `npm run typecheck` — это главный критерий готовности.
+Методичка [`typescript.html`](typescript.html) — открывается в браузере. Каждый шаг заканчивается зелёным `npm run typecheck` — это главный критерий готовности.
 
 ## Что внутри (5 сессий, порядок строгий)
 
