@@ -17,7 +17,7 @@ TypeScript 6.0 (код проверен и на 5.9) + Node 24+ (LTS) + `tsx` + 
 
 ## Формат
 
-Методичка [`typescript.html`](typescript.html) — открывается в браузере. Каждый шаг заканчивается зелёным `npm run typecheck` — это главный критерий готовности.
+Методичка [`typescript.html`](typescript.html) ([открыть на сайте](https://anitech.meeymirita.ru/works/typescript.html)) — открывается в браузере. Каждый шаг заканчивается зелёным `npm run typecheck` — это главный критерий готовности.
 
 ## Что внутри (5 сессий, порядок строгий)
 
@@ -26,6 +26,10 @@ TypeScript 6.0 (код проверен и на 5.9) + Node 24+ (LTS) + `tsx` + 
 - **Сессия 3** — generics и абстракции: `Repository<T>`, `TypedEmitter<Events>`, mapped/conditional/template literal types, `satisfies` — сервис `Warehouse`, собранный из типизированных кубиков
 - **Сессия 4** — CLI: `parseArgs`, команды как union из template literal types, валидация через Zod и `z.infer`, `unknown` в `catch`, `.d.ts` для JS, сборка esbuild — рабочий `wh`: `item:add`, `stock:in/out/transfer/list/low`, `import:csv`
 - **Сессия 5** — сквозная типизация: `ApiContract`, generic-клиент с conditional types, Express + Zod на бэкенде, Vue 3 + TS (`defineProps`/`defineEmits` с generics, типизированный store), `vue-tsc` — один источник типов и в API, и в браузере
+
+## Лицензия и авторство
+
+Код — MIT, тексты — CC BY 4.0, обложки и иллюстрации не покрыты (см. [LICENSE](LICENSE)). Кто что сделал: [NOTICE](NOTICE).
 
 ---
 
