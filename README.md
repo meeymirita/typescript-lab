@@ -4,7 +4,7 @@
 
 > **24.09.2026 — методичка вычитана и исправлена.** Что найдено и что поправлено — в [fixes/frontend/typescript.md](https://github.com/meeymirita/lab-fixes/blob/main/frontend/typescript.md) репозитория `lab-fixes`.
 
-**Статус: ⚪ методичка вычитана и проверена запуском (04.10.2026), прохождение впереди. 17.10.2026 переведена в формат Caddy; вопросы «Проверь себя» к шагу 1.1 написаны по тексту шага.**
+**Статус: 🟡 10 сессий (расширена 21.10.2026, формат Caddy). Сессии 1–5 вычитаны и проверены запуском (04.10.2026, переведены в формат Caddy 17.10.2026). Сессии 6–10 — новые (conditional types/infer, декораторы TS 5.x и DI, тесты на типы, project references, итоговое ТЗ без решения) — написаны ассистентом по инструкции владельца «только контент», без вычитки и без прогона в Docker.**
 **Сложность: высокая** — абстрактное мышление на уровне типов (generics, conditional/mapped types) непривычно после динамического PHP. Логично проходить после или параллельно с Vue-лабой (сессия 5 её использует).
 
 ## О чём
@@ -19,13 +19,18 @@ TypeScript 6.0 (код проверен и на 5.9) + Node 24+ (LTS) + `tsx` + 
 
 Методичка [`typescript.html`](typescript.html) ([открыть на сайте](https://anitech.meeymirita.ru/works/typescript.html)) — открывается в браузере. Каждый шаг заканчивается зелёным `npm run typecheck` — это главный критерий готовности.
 
-## Что внутри (5 сессий, порядок строгий)
+## Что внутри (10 сессий, порядок строгий)
 
 - **Сессия 1** — стенд (Docker, workspaces, `tsconfig.base`, `tsx`, Vitest); песочница: аннотации, вывод типов, примитивы/объекты, union и литералы, `type` vs `interface`, функции, `any`/`unknown`/`never`, `strict`, `as const`
 - **Сессия 2** — домен склада: branded IDs, размеченное объединение `Movement`, exhaustive `switch`, `Result` вместо исключений, type predicates, `readonly` — `applyMovement` с тестами, невозможные состояния невыразимы на уровне типов
 - **Сессия 3** — generics и абстракции: `Repository<T>`, `TypedEmitter<Events>`, mapped/conditional/template literal types, `satisfies` — сервис `Warehouse`, собранный из типизированных кубиков
 - **Сессия 4** — CLI: `parseArgs`, команды как union из template literal types, валидация через Zod и `z.infer`, `unknown` в `catch`, `.d.ts` для JS, сборка esbuild — рабочий `wh`: `item:add`, `stock:in/out/transfer/list/low`, `import:csv`
 - **Сессия 5** — сквозная типизация: `ApiContract`, generic-клиент с conditional types, Express + Zod на бэкенде, Vue 3 + TS (`defineProps`/`defineEmits` с generics, типизированный store), `vue-tsc` — один источник типов и в API, и в браузере
+- **Сессия 6** — conditional types и `infer`: голый vs обёрнутый параметр, constrained infer, template literal types — типобезопасные фильтры `Filter<T>`/`FilterKey` и команда `stock:filter --query` в CLI
+- **Сессия 7** — декораторы TS 5.x (method/class/accessor, `context.addInitializer`) без `experimentalDecorators`/`reflect-metadata` — `Token<T>`, маленький DI `Container`, `bootstrap()` вместо ручной сборки `Warehouse`
+- **Сессия 8** — тесты на типы как отдельная дисциплина: когда `expectTypeOf` на самом деле проверяется, выделенные `*.types.test.ts`, разбор регрессии на `MovementOf`, скрипт-аудит `@ts-expect-error`
+- **Сессия 9** — инструменты и масштаб: `composite`/`references`/`tsc -b`, declaration maps и двойные `exports`, когда нужен (и не нужен здесь) `paths`, `.tsbuildinfo` и инкрементальные сборки
+- **Сессия 10** — итоговое ТЗ без решения: журнал аудита складских операций, собирающий домен, DI, фильтры, декораторы и типовые тесты из сессий 1–9
 
 ## Лицензия и авторство
 
